@@ -74,6 +74,8 @@ const INITIAL_HOUSE: HouseEntrySpec[] = [
   { path: "upperdeck/toilet", kind: "artifact", color: "#f4f7fa", position: [1.7, 3.4, 1.8] },
   { path: "upperdeck/sink", kind: "artifact", color: "#eef4f8", position: [-1.7, 3.4, 1.8] },
   { path: "upperdeck/bathtub", kind: "artifact", color: "#cfe6f4", position: [0, 3.4, 1.9] },
+  { path: "upperdeck/wall-left", kind: "artifact", color: "#f2e3b3", position: [-2.1, 3.4, 0.8], scale: [1.4, 1, 1] },
+  { path: "upperdeck/wall-right", kind: "artifact", color: "#f2e3b3", position: [1.2, 3.4, 0.8], scale: [3.2, 1, 1] },
   { path: "lowerdeck", kind: "component", color: "#e8c56a", position: [0, 0, 0] },
   { path: "lowerdeck/table", kind: "artifact", color: "#a9713f", position: [0, 0.4, 0] },
   { path: "lowerdeck/chair", kind: "artifact", color: "#c58a4e", position: [1, 0.4, 0] },
@@ -81,7 +83,6 @@ const INITIAL_HOUSE: HouseEntrySpec[] = [
   { path: "lowerdeck/tv", kind: "artifact", color: "#3d4654", position: [0, 0.6, 2] },
   { path: "structural", kind: "component", color: "#6e7480", position: [0, 0, 0] },
   { path: "structural/roof", kind: "artifact", color: "#c94f4f", position: [0, 6.7, 0] },
-  { path: "structural/walls", kind: "artifact", color: "#f2e3b3", position: [0, 3, 0] },
   { path: "structural/stairs", kind: "artifact", color: "#9c7148", position: [2, 1.5, 2] },
   { path: "structural/windows", kind: "artifact", color: "#bfe3ff", position: [0, 1.5, 4] },
 ];

@@ -13,7 +13,7 @@ describe("buildRenderList", () => {
 
   it("renders one item per schema artifact, in schema order", () => {
     const items = buildRenderList(house);
-    expect(items).toHaveLength(19);
+    expect(items).toHaveLength(20);
     expect([...items.map((item) => item.path)].sort()).toEqual(
       [...initialHousePaths()].sort(),
     );
@@ -48,12 +48,13 @@ describe("buildRenderList", () => {
       "upperdeck/toilet": "toilet",
       "upperdeck/sink": "sink",
       "upperdeck/bathtub": "bathtub",
+      "upperdeck/wall-left": "walls",
+      "upperdeck/wall-right": "walls",
       "lowerdeck/table": "table",
       "lowerdeck/chair": "chair",
       "lowerdeck/sofa": "sofa",
       "lowerdeck/tv": "tv",
       "structural/roof": "roof",
-      "structural/walls": "walls",
       "structural/stairs": "stairs",
       "structural/windows": "windows",
     };
@@ -66,7 +67,7 @@ describe("buildRenderList", () => {
     const pruned = cloneHouse(house);
     delete pruned["lowerdeck/table"];
     const remaining = buildRenderList(pruned);
-    expect(remaining).toHaveLength(18);
+    expect(remaining).toHaveLength(19);
     expect(remaining.some((item) => item.path === "lowerdeck/table")).toBe(
       false,
     );

@@ -121,7 +121,7 @@ describe("ls-files and ls-tree", () => {
     const files = lsFiles(repo);
     expect(files).toContain("lowerdeck/table");
     expect(files).toContain("structural/roof");
-    expect(files).toHaveLength(19);
+    expect(files).toHaveLength(20);
   });
 
   it("lists commit trees with kinds", () => {

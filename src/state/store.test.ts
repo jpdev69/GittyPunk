@@ -23,7 +23,7 @@ describe("app store", () => {
 
   it("starts with the initial house as the working tree", () => {
     const { repo } = useAppStore.getState();
-    expect(Object.keys(repo.working)).toHaveLength(19);
+    expect(Object.keys(repo.working)).toHaveLength(20);
   });
 
   it("runs git commands through the parser and swaps in the new repo", () => {

@@ -86,43 +86,6 @@ function Piece({ surface, position, rotation, children }: PieceProps) {
   );
 }
 
-interface DividerSpec {
-  position: Vec3Tuple;
-  size: Vec3Tuple;
-}
-
-const UPPER_DIVIDERS: DividerSpec[] = [
-  { position: [-2.1, 1.0, 0.8], size: [1.4, 1.2, 0.16] },
-  { position: [1.2, 1.0, 0.8], size: [3.2, 1.2, 0.16] },
-];
-
-function WallsPiece({ surface }: { surface: PieceSurface }) {
-  return (
-    <group>
-      <mesh position={[0, -3, 0]} renderOrder={1} raycast={() => null}>
-        <boxGeometry args={[5.6, 6, 5.6]} />
-        <meshToonMaterial
-          color={surface.color}
-          gradientMap={gradientMap}
-          transparent
-          opacity={0.13}
-          depthWrite={false}
-          side={THREE.DoubleSide}
-        />
-      </mesh>
-      {UPPER_DIVIDERS.map((divider, index) => (
-        <Piece
-          key={index}
-          surface={surface}
-          position={divider.position}
-        >
-          <boxGeometry args={divider.size} />
-        </Piece>
-      ))}
-    </group>
-  );
-}
-
 interface ArtifactGeometryProps {
   kind: GeometryKind;
   surface: PieceSurface;
@@ -145,7 +108,7 @@ export function ArtifactGeometry({ kind, surface }: ArtifactGeometryProps) {
     case "attic":
       return piece([0, 0.2, 0], <boxGeometry args={[4.6, 0.4, 4.6]} />);
     case "walls":
-      return <WallsPiece surface={surface} />;
+      return piece([0, 0.6, 0], <boxGeometry args={[1, 1.2, 0.16]} />);
     case "roof":
       return (
         <>
@@ -338,6 +301,7 @@ const OUTLINES: Partial<Record<GeometryKind, OutlineSpec>> = {
   box: { size: [0.85, 0.65, 0.85], offset: [0, 0.33, 0] },
   plant: { size: [0.68, 1.1, 0.68], offset: [0, 0.55, 0] },
   rug: { size: [1.7, 0.1, 1.15], offset: [0, 0.05, 0] },
+  walls: { size: [1, 1.2, 0.16], offset: [0, 0.6, 0] },
   crate: { size: [0.9, 0.9, 0.9], offset: [0, 0.45, 0] },
 };
 
@@ -345,15 +309,18 @@ export function OutlineGhost({
   kind,
   color,
   position,
+  scale,
 }: {
   kind: GeometryKind;
   color: string;
   position: Vec3Tuple;
+  scale?: Vec3Tuple;
 }) {
   const spec = OUTLINES[kind];
   if (!spec) return null;
   return (
     <mesh
+      scale={scale ?? [1, 1, 1]}
       position={[
         position[0] + spec.offset[0],
         position[1] + spec.offset[1],

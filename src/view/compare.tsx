@@ -104,6 +104,7 @@ function CompareSide({
               kind={toRenderItem(change.path, change.after).geometry}
               color={ADDED_OUTLINE}
               position={change.after.transform.position}
+              scale={change.after.transform.scale}
             />,
           ];
         }
@@ -114,6 +115,7 @@ function CompareSide({
             kind={toRenderItem(change.path, change.before).geometry}
             color={REMOVED_OUTLINE}
             position={change.before.transform.position}
+            scale={change.before.transform.scale}
           />,
         ];
       })}

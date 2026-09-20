@@ -5,10 +5,10 @@ export type GeometryKind =
   | "deck"
   | "attic"
   | "container"
-  | "walls"
   | "roof"
   | "stairs"
   | "windows"
+  | "walls"
   | "table"
   | "chair"
   | "sofa"
@@ -36,13 +36,14 @@ export interface RenderItem {
 }
 
 const STRUCTURAL_GEOMETRY: Record<string, GeometryKind> = {
-  walls: "walls",
   roof: "roof",
   stairs: "stairs",
   windows: "windows",
 };
 
 const OBJECT_GEOMETRY: Record<string, GeometryKind> = {
+  "wall-left": "walls",
+  "wall-right": "walls",
   table: "table",
   chair: "chair",
   sofa: "sofa",
