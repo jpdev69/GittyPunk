@@ -113,6 +113,6 @@ describe("reset", () => {
     repo = reset(repo, { mode: "hard", revision: "HEAD~2" });
     expect(repo.branches["main"]).toBe(initial);
     expect(getStatus(repo).clean).toBe(true);
-    expect(repo.working["lowerdeck/table"].transform.position).toEqual([0, 0.4, 0]);
+    expect(repo.working["lowerdeck/table"].transform.position).toEqual([-0.5, 0.4, 1.6]);
   });
 });

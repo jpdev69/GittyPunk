@@ -59,7 +59,7 @@ describe("rebase", () => {
     const messages = logQuery(outcome.repo, { revs: ["feature"] }).map((c) => c.message);
     expect(messages).not.toContain("Move table");
     expect(messages).toContain("Recolor tv");
-    expect(headCommit(outcome.repo).tree["lowerdeck/table"].transform.position).toEqual([0, 0.4, 0]);
+    expect(headCommit(outcome.repo).tree["lowerdeck/table"].transform.position).toEqual([-0.5, 0.4, 1.6]);
   });
 
   it("stops on conflicts and continues after resolution", () => {

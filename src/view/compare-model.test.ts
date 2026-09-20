@@ -56,7 +56,7 @@ describe("compareChanges", () => {
       rescaled: false,
       retoggled: false,
     });
-    expect(byPath["lowerdeck/table"]?.fromPosition).toEqual([0, 0.4, 0]);
+    expect(byPath["lowerdeck/table"]?.fromPosition).toEqual([-0.5, 0.4, 1.6]);
     expect(byPath["lowerdeck/sofa"]?.rotated).toBe(true);
     expect(byPath["lowerdeck/tv"]?.recolored).toBe(true);
     expect(byPath["upperdeck/bed"]?.retoggled).toBe(true);

@@ -12,12 +12,12 @@ import House from "./House";
 
 const HOUSE_BOX = new THREE.Box3(
   new THREE.Vector3(-5, -0.4, -5),
-  new THREE.Vector3(5, 8.9, 5),
+  new THREE.Vector3(5, 9.6, 5),
 );
 
 const COMPARE_BOX = new THREE.Box3(
   new THREE.Vector3(-13.5, -0.4, -5),
-  new THREE.Vector3(13.5, 15.2, 5),
+  new THREE.Vector3(13.5, 9.6, 5),
 );
 
 function deckFocusBox(path: string): THREE.Box3 | null {
