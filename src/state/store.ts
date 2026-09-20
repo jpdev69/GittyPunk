@@ -1,8 +1,8 @@
 import { create } from "zustand";
-import { createInitialRepository } from "../engine";
+import { createInitialRepository, headCommit } from "../engine";
 import type { Repository } from "../engine";
 import { emptyEnv, executeCommand } from "../parser";
-import type { ExecutionEnv } from "../parser";
+import type { CommandResult, ExecutionEnv } from "../parser";
 
 export interface TerminalLine {
   kind: "info" | "input" | "output" | "error";
@@ -11,15 +11,60 @@ export interface TerminalLine {
 
 export const MAX_TERMINAL_LINES = 400;
 
+export type ViewMode = "working" | "blueprint" | "snapshot";
+
+export interface Flash {
+  kind: "stage" | "commit" | "reset" | "conflict" | "error";
+  message: string;
+  at: number;
+}
+
+function nextFlash(input: string, result: CommandResult): Flash | null {
+  const at = performance.now();
+  const command = input.trim();
+  if (result.error) {
+    return {
+      kind: "error",
+      message: result.output[0] ?? "",
+      at,
+    };
+  }
+  const repo = result.repo;
+  if (repo.merge || repo.rebase) {
+    return {
+      kind: "conflict",
+      message: "Conflicts - resolve the glowing artifacts",
+      at,
+    };
+  }
+  if (command.startsWith("git commit")) {
+    return {
+      kind: "commit",
+      message: `Snapshot frozen: ${headCommit(repo).message}`,
+      at,
+    };
+  }
+  if (/^git (add|rm|restore)\b/.test(command)) {
+    return { kind: "stage", message: "Blueprint updated", at };
+  }
+  if (/^git reset\b/.test(command)) {
+    return { kind: "reset", message: "House rolled back", at };
+  }
+  return null;
+}
+
 export interface AppState {
   repo: Repository;
   env: ExecutionEnv;
   lines: TerminalLine[];
   selected: string | null;
   focused: string | null;
+  viewMode: ViewMode;
+  flash: Flash | null;
   runCommand: (input: string) => void;
   select: (path: string | null) => void;
   focusDeck: (path: string | null) => void;
+  setViewMode: (mode: ViewMode) => void;
 }
 
 export const useAppStore = create<AppState>()((set, get) => ({
@@ -33,6 +78,8 @@ export const useAppStore = create<AppState>()((set, get) => ({
   ],
   selected: null,
   focused: null,
+  viewMode: "working",
+  flash: null,
   runCommand: (input) => {
     const { repo, env, lines } = get();
     const result = executeCommand(input, repo, env);
@@ -47,8 +94,10 @@ export const useAppStore = create<AppState>()((set, get) => ({
       repo: result.repo,
       env: result.env,
       lines: [...lines, ...added].slice(-MAX_TERMINAL_LINES),
+      flash: nextFlash(input, result),
     });
   },
   select: (path) => set({ selected: path }),
   focusDeck: (path) => set({ focused: path }),
+  setViewMode: (mode) => set({ viewMode: mode }),
 }));

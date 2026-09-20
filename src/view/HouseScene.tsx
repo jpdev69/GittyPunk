@@ -3,6 +3,7 @@ import type { CameraControlsImpl } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import { headCommit } from "../engine";
 import { useAppStore } from "../state/store";
 import House from "./House";
 
@@ -72,9 +73,12 @@ function Ground() {
 
 function SelectionCard() {
   const selected = useAppStore((state) => state.selected);
-  const artifact = useAppStore((state) =>
-    state.selected ? state.repo.working[state.selected] : undefined,
-  );
+  const repo = useAppStore((state) => state.repo);
+  const artifact = selected
+    ? repo.working[selected] ??
+      repo.index[selected] ??
+      headCommit(repo).tree[selected]
+    : undefined;
   if (!selected || !artifact) return null;
   return (
     <aside className="selection-card">
@@ -104,12 +108,34 @@ function SelectionCard() {
 
 function HintBar() {
   const focused = useAppStore((state) => state.focused);
+  const viewMode = useAppStore((state) => state.viewMode);
+  if (focused) return <p className="scene-hint">Click empty space to zoom back out</p>;
+  if (viewMode === "blueprint") {
+    return (
+      <p className="scene-hint">
+        Staged Blueprint - what the next commit will capture
+      </p>
+    );
+  }
+  if (viewMode === "snapshot") {
+    return (
+      <p className="scene-hint">Commit Snapshot - the house as last committed</p>
+    );
+  }
   return (
     <p className="scene-hint">
-      {focused
-        ? "Click empty space to zoom back out"
-        : "Click an artifact to inspect - click a deck to zoom"}
+      Click an artifact to inspect - click a deck to zoom
     </p>
+  );
+}
+
+function FlashOverlay() {
+  const flash = useAppStore((state) => state.flash);
+  if (!flash) return null;
+  return (
+    <div key={flash.at} className={`flash flash-${flash.kind}`}>
+      <p>{flash.message}</p>
+    </div>
   );
 }
 
@@ -148,6 +174,7 @@ export default function HouseScene() {
         <Ground />
       </Canvas>
       <SelectionCard />
+      <FlashOverlay />
       <HintBar />
     </div>
   );

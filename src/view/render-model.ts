@@ -71,19 +71,22 @@ export function geometryFor(artifact: Artifact): GeometryKind {
   );
 }
 
+export function toRenderItem(path: string, artifact: Artifact): RenderItem {
+  return {
+    path,
+    name: artifact.name,
+    kind: artifact.kind,
+    geometry: geometryFor(artifact),
+    position: artifact.transform.position,
+    rotation: artifact.transform.rotation,
+    scale: artifact.transform.scale,
+    color: artifact.color,
+    visible: artifact.visible,
+  };
+}
+
 export function buildRenderList(house: House): RenderItem[] {
-  return housePaths(house).map((path) => {
-    const artifact = house[path] as Artifact;
-    return {
-      path,
-      name: artifact.name,
-      kind: artifact.kind,
-      geometry: geometryFor(artifact),
-      position: artifact.transform.position,
-      rotation: artifact.transform.rotation,
-      scale: artifact.transform.scale,
-      color: artifact.color,
-      visible: artifact.visible,
-    };
-  });
+  return housePaths(house).map((path) =>
+    toRenderItem(path, house[path] as Artifact),
+  );
 }

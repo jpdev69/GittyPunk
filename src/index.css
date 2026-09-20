@@ -100,6 +100,176 @@ body {
   white-space: nowrap;
 }
 
+.flash {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  animation: flash-fade 1.8s ease-out forwards;
+}
+
+.flash p {
+  margin: 0;
+  white-space: nowrap;
+}
+
+@keyframes flash-fade {
+  0% {
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.flash-stage {
+  background: rgba(31, 58, 105, 0.92);
+  color: #9fd3ff;
+  border: 1px solid #3b5c8f;
+}
+
+.flash-commit {
+  background: rgba(23, 61, 47, 0.92);
+  color: #7ee787;
+  border: 1px solid #2f7a55;
+}
+
+.flash-reset {
+  background: rgba(90, 68, 23, 0.92);
+  color: #ffd76a;
+  border: 1px solid #a0843b;
+}
+
+.flash-conflict {
+  background: rgba(90, 23, 33, 0.92);
+  color: #ff8f8f;
+  border: 1px solid #a04a5a;
+}
+
+.flash-error {
+  background: rgba(90, 23, 23, 0.92);
+  color: #ff7b72;
+  border: 1px solid #a04a4a;
+}
+
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 38px;
+  padding: 0 14px;
+  border-top: 1px solid #26324a;
+  background-color: #0d1424;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  flex: none;
+}
+
+.status-branch {
+  color: #7ee787;
+  font-weight: 600;
+}
+
+.status-ahead {
+  color: #9fd3ff;
+}
+
+.status-behind {
+  color: #ffd76a;
+}
+
+.badge-merge,
+.badge-rebase {
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+.badge-merge {
+  background: #5a2333;
+  color: #ff8f8f;
+  border: 1px solid #a04a5a;
+}
+
+.badge-rebase {
+  background: #23405a;
+  color: #8fc4ff;
+  border: 1px solid #4a7aa0;
+}
+
+.status-parts {
+  display: flex;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: #8b98b8;
+}
+
+.status-part {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.part-modified {
+  color: #ffd76a;
+}
+
+.part-staged {
+  color: #7fb8ff;
+}
+
+.part-removal {
+  color: #ff7b72;
+}
+
+.part-untracked {
+  color: #c79aff;
+}
+
+.part-conflict {
+  color: #ff5c5c;
+}
+
+.part-clean {
+  color: #7ee787;
+}
+
+.view-toggle {
+  display: flex;
+  gap: 4px;
+  flex: none;
+}
+
+.view-toggle button {
+  background: transparent;
+  border: 1px solid #26324a;
+  color: #8b98b8;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.view-toggle button.active {
+  background: #1b2c4a;
+  color: #9fd3ff;
+  border-color: #3b5c8f;
+}
+
 .terminal {
   height: 240px;
   display: flex;
