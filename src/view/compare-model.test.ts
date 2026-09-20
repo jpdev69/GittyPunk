@@ -18,9 +18,9 @@ import { compareChanges } from "./compare-model";
 
 function scenarioRepo(): Repository {
   let repo = createInitialRepository();
-  repo = moveArtifact(repo, "middledeck/table", [2, 3.4, 1]);
-  repo = rotateArtifact(repo, "middledeck/sofa", [0, Math.PI / 6, 0]);
-  repo = recolorArtifact(repo, "middledeck/tv", "#40e0d0");
+  repo = moveArtifact(repo, "lowerdeck/table", [2, 0.4, 1]);
+  repo = rotateArtifact(repo, "lowerdeck/sofa", [0, Math.PI / 6, 0]);
+  repo = recolorArtifact(repo, "lowerdeck/tv", "#40e0d0");
   repo = hideArtifact(repo, "upperdeck/bed");
   const box = repo.working["attic/box"];
   if (!box) throw new Error("test setup: missing attic/box");
@@ -28,15 +28,15 @@ function scenarioRepo(): Repository {
     ...box,
     transform: { ...box.transform, scale: [2, 2, 2] },
   });
-  repo = addNewArtifact(repo, "middledeck/rug");
+  repo = addNewArtifact(repo, "lowerdeck/rug");
   repo = removeTracked(repo, "upperdeck/lamp", { cached: false });
-  repo = stage(repo, "middledeck/table");
-  repo = stage(repo, "middledeck/sofa");
-  repo = stage(repo, "middledeck/tv");
+  repo = stage(repo, "lowerdeck/table");
+  repo = stage(repo, "lowerdeck/sofa");
+  repo = stage(repo, "lowerdeck/tv");
   repo = stage(repo, "upperdeck/bed");
   repo = stage(repo, "attic/box");
-  repo = stage(repo, "middledeck/rug");
-  return stageAndCommit(repo, "middledeck/rug", "Rearrange").repo;
+  repo = stage(repo, "lowerdeck/rug");
+  return stageAndCommit(repo, "lowerdeck/rug", "Rearrange").repo;
 }
 
 describe("compareChanges", () => {
@@ -47,7 +47,7 @@ describe("compareChanges", () => {
       changes.map((change) => [change.path, change]),
     );
 
-    expect(byPath["middledeck/table"]).toMatchObject({
+    expect(byPath["lowerdeck/table"]).toMatchObject({
       added: false,
       removed: false,
       moved: true,
@@ -56,19 +56,19 @@ describe("compareChanges", () => {
       rescaled: false,
       retoggled: false,
     });
-    expect(byPath["middledeck/table"]?.fromPosition).toEqual([0, 3.4, 0]);
-    expect(byPath["middledeck/sofa"]?.rotated).toBe(true);
-    expect(byPath["middledeck/tv"]?.recolored).toBe(true);
+    expect(byPath["lowerdeck/table"]?.fromPosition).toEqual([0, 0.4, 0]);
+    expect(byPath["lowerdeck/sofa"]?.rotated).toBe(true);
+    expect(byPath["lowerdeck/tv"]?.recolored).toBe(true);
     expect(byPath["upperdeck/bed"]?.retoggled).toBe(true);
     expect(byPath["attic/box"]?.rescaled).toBe(true);
-    expect(byPath["middledeck/rug"]).toMatchObject({
+    expect(byPath["lowerdeck/rug"]).toMatchObject({
       added: true,
       removed: false,
       moved: false,
       fromPosition: null,
     });
-    expect(byPath["middledeck/rug"]?.before).toBeNull();
-    expect(byPath["middledeck/rug"]?.after).not.toBeNull();
+    expect(byPath["lowerdeck/rug"]?.before).toBeNull();
+    expect(byPath["lowerdeck/rug"]?.after).not.toBeNull();
     expect(byPath["upperdeck/lamp"]).toMatchObject({
       added: false,
       removed: true,
@@ -80,13 +80,13 @@ describe("compareChanges", () => {
 
   it("resolves working and index refs like git diff does", () => {
     let repo = createInitialRepository();
-    repo = recolorArtifact(repo, "middledeck/sofa", "#123456");
+    repo = recolorArtifact(repo, "lowerdeck/sofa", "#123456");
     const unstaged = compareChanges(repo, "index", "working");
     expect(unstaged).toHaveLength(1);
-    expect(unstaged[0]?.path).toBe("middledeck/sofa");
+    expect(unstaged[0]?.path).toBe("lowerdeck/sofa");
     expect(unstaged[0]?.recolored).toBe(true);
 
-    repo = stage(repo, "middledeck/sofa");
+    repo = stage(repo, "lowerdeck/sofa");
     const staged = compareChanges(repo, "HEAD", "index");
     expect(staged).toHaveLength(1);
     expect(staged[0]?.recolored).toBe(true);

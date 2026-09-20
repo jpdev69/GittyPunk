@@ -31,13 +31,13 @@ function runOk(repo: Repository, input: string): Repository {
 function scenarioRepo(): Repository {
   let repo = createInitialRepository();
   repo = stage(
-    recolorArtifact(repo, "middledeck/chair", "#4060ff"),
-    "middledeck/chair",
+    recolorArtifact(repo, "lowerdeck/chair", "#4060ff"),
+    "lowerdeck/chair",
   );
-  repo = recolorArtifact(repo, "middledeck/chair", "#80a0ff");
-  repo = recolorArtifact(repo, "middledeck/sofa", "#305070");
-  repo = addNewArtifact(repo, "middledeck/rug");
-  repo = removeTracked(repo, "middledeck/table", { cached: false });
+  repo = recolorArtifact(repo, "lowerdeck/chair", "#80a0ff");
+  repo = recolorArtifact(repo, "lowerdeck/sofa", "#305070");
+  repo = addNewArtifact(repo, "lowerdeck/rug");
+  repo = removeTracked(repo, "lowerdeck/table", { cached: false });
   repo = removeWorkingArtifact(repo, "upperdeck/lamp");
   return repo;
 }
@@ -48,10 +48,10 @@ describe("computeVisualStates", () => {
     const status = run(repo, "git status --short");
     expect(status.error).toBe(false);
     expect(status.output).toEqual([
-      "MM middledeck/chair",
-      "?? middledeck/rug",
-      " M middledeck/sofa",
-      "D  middledeck/table",
+      "MM lowerdeck/chair",
+      "?? lowerdeck/rug",
+      " M lowerdeck/sofa",
+      "D  lowerdeck/table",
       " D upperdeck/lamp",
     ]);
 
@@ -100,14 +100,14 @@ describe("computeVisualStates", () => {
     let repo = createInitialRepository();
     repo = runOk(repo, "git checkout -b feature");
     repo = stageAndCommit(
-      recolorArtifact(repo, "middledeck/sofa", "#111111"),
-      "middledeck/sofa",
+      recolorArtifact(repo, "lowerdeck/sofa", "#111111"),
+      "lowerdeck/sofa",
       "Feature sofa",
     ).repo;
     repo = runOk(repo, "git checkout main");
     repo = stageAndCommit(
-      recolorArtifact(repo, "middledeck/sofa", "#222222"),
-      "middledeck/sofa",
+      recolorArtifact(repo, "lowerdeck/sofa", "#222222"),
+      "lowerdeck/sofa",
       "Main sofa",
     ).repo;
     const conflicted = run(repo, "git merge feature");
@@ -115,10 +115,10 @@ describe("computeVisualStates", () => {
     expect(conflicted.repo.merge).not.toBeNull();
 
     const status = run(conflicted.repo, "git status --short");
-    expect(status.output).toEqual(["UU middledeck/sofa"]);
+    expect(status.output).toEqual(["UU lowerdeck/sofa"]);
 
     const states = computeVisualStates(conflicted.repo);
-    const state = states["middledeck/sofa"];
+    const state = states["lowerdeck/sofa"];
     expect(state.conflict?.kind).toBe("both-modified");
     expect(state.conflict?.theirs?.color).toBe("#111111");
     expect(state.unstaged).toBeNull();

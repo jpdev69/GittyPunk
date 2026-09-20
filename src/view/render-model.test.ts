@@ -13,7 +13,7 @@ describe("buildRenderList", () => {
 
   it("renders one item per schema artifact, in schema order", () => {
     const items = buildRenderList(house);
-    expect(items).toHaveLength(21);
+    expect(items).toHaveLength(19);
     expect([...items.map((item) => item.path)].sort()).toEqual(
       [...initialHousePaths()].sort(),
     );
@@ -38,22 +38,20 @@ describe("buildRenderList", () => {
     const kinds = new Map(items.map((item) => [item.path, item.geometry]));
     const expected: Record<string, string> = {
       attic: "attic",
-      roofdeck: "deck",
       upperdeck: "deck",
-      middledeck: "deck",
       lowerdeck: "deck",
       structural: "container",
       "attic/box": "box",
-      "roofdeck/plant": "plant",
+      "attic/plant": "plant",
       "upperdeck/bed": "bed",
       "upperdeck/lamp": "lamp",
-      "middledeck/table": "table",
-      "middledeck/chair": "chair",
-      "middledeck/sofa": "sofa",
-      "middledeck/tv": "tv",
-      "lowerdeck/toilet": "toilet",
-      "lowerdeck/sink": "sink",
-      "lowerdeck/bathtub": "bathtub",
+      "upperdeck/toilet": "toilet",
+      "upperdeck/sink": "sink",
+      "upperdeck/bathtub": "bathtub",
+      "lowerdeck/table": "table",
+      "lowerdeck/chair": "chair",
+      "lowerdeck/sofa": "sofa",
+      "lowerdeck/tv": "tv",
       "structural/roof": "roof",
       "structural/walls": "walls",
       "structural/stairs": "stairs",
@@ -66,16 +64,16 @@ describe("buildRenderList", () => {
 
   it("drops artifacts that leave the working tree", () => {
     const pruned = cloneHouse(house);
-    delete pruned["middledeck/table"];
+    delete pruned["lowerdeck/table"];
     const remaining = buildRenderList(pruned);
-    expect(remaining).toHaveLength(20);
-    expect(remaining.some((item) => item.path === "middledeck/table")).toBe(
+    expect(remaining).toHaveLength(18);
+    expect(remaining.some((item) => item.path === "lowerdeck/table")).toBe(
       false,
     );
   });
 
   it("falls back to a crate for unknown artifact names", () => {
-    expect(geometryFor(makeArtifact("middledeck/gizmo"))).toBe("crate");
-    expect(geometryFor(makeArtifact("middledeck/mat"))).toBe("rug");
+    expect(geometryFor(makeArtifact("lowerdeck/gizmo"))).toBe("crate");
+    expect(geometryFor(makeArtifact("lowerdeck/mat"))).toBe("rug");
   });
 });

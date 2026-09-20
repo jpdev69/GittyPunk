@@ -23,8 +23,8 @@ describe("branches", () => {
     repo = createBranch(repo, "feature/upside-down");
     repo = checkout(repo, "feature/upside-down");
     expect(currentBranch(repo)).toBe("feature/upside-down");
-    repo = moveArtifact(repo, "middledeck/table", [5, 3.4, 0]);
-    repo = stageAndCommit(repo, "middledeck/table", "Move table").repo;
+    repo = moveArtifact(repo, "lowerdeck/table", [5, 0.4, 0]);
+    repo = stageAndCommit(repo, "lowerdeck/table", "Move table").repo;
     expect(
       logQuery(repo, { revs: ["main"] }).some((c) => c.message === "Move table"),
     ).toBe(false);
@@ -46,18 +46,18 @@ describe("branches", () => {
   it("checkout carries compatible unstaged changes", () => {
     let repo = createInitialRepository();
     repo = createBranch(repo, "other");
-    repo = moveArtifact(repo, "middledeck/table", [5, 3.4, 0]);
+    repo = moveArtifact(repo, "lowerdeck/table", [5, 0.4, 0]);
     repo = checkout(repo, "other");
-    const entry = getStatus(repo).entries.find((entry) => entry.path === "middledeck/table");
+    const entry = getStatus(repo).entries.find((entry) => entry.path === "lowerdeck/table");
     expect(entry?.worktree).toBe("modified");
   });
 
   it("checkout blocks incompatible unstaged changes", () => {
     let repo = createInitialRepository();
     repo = createBranch(repo, "other");
-    repo = moveArtifact(repo, "middledeck/table", [5, 3.4, 0]);
-    repo = stageAndCommit(repo, "middledeck/table", "Move table").repo;
-    repo = moveArtifact(repo, "middledeck/table", [9, 3.4, 0]);
+    repo = moveArtifact(repo, "lowerdeck/table", [5, 0.4, 0]);
+    repo = stageAndCommit(repo, "lowerdeck/table", "Move table").repo;
+    repo = moveArtifact(repo, "lowerdeck/table", [9, 0.4, 0]);
     expect(() => checkout(repo, "other")).toThrow(/would be overwritten/);
   });
 
@@ -80,8 +80,8 @@ describe("merge", () => {
     let repo = createInitialRepository();
     repo = createBranch(repo, "feature");
     repo = checkout(repo, "feature");
-    repo = moveArtifact(repo, "middledeck/table", [5, 3.4, 0]);
-    const result = stageAndCommit(repo, "middledeck/table", "Move table");
+    repo = moveArtifact(repo, "lowerdeck/table", [5, 0.4, 0]);
+    const result = stageAndCommit(repo, "lowerdeck/table", "Move table");
     repo = result.repo;
     repo = checkout(repo, "main");
     const outcome = merge(repo, "feature");
@@ -93,8 +93,8 @@ describe("merge", () => {
   it("is already up to date when the target is behind", () => {
     let repo = createInitialRepository();
     repo = createBranch(repo, "feature");
-    repo = moveArtifact(repo, "middledeck/table", [5, 3.4, 0]);
-    repo = stageAndCommit(repo, "middledeck/table", "Move table").repo;
+    repo = moveArtifact(repo, "lowerdeck/table", [5, 0.4, 0]);
+    repo = stageAndCommit(repo, "lowerdeck/table", "Move table").repo;
     const outcome = merge(repo, "feature");
     expect(outcome.alreadyUpToDate).toBe(true);
   });
@@ -103,18 +103,18 @@ describe("merge", () => {
     let repo = createInitialRepository();
     repo = createBranch(repo, "feature");
     repo = checkout(repo, "feature");
-    repo = moveArtifact(repo, "middledeck/table", [5, 3.4, 0]);
-    repo = stageAndCommit(repo, "middledeck/table", "Move table").repo;
+    repo = moveArtifact(repo, "lowerdeck/table", [5, 0.4, 0]);
+    repo = stageAndCommit(repo, "lowerdeck/table", "Move table").repo;
     repo = checkout(repo, "main");
-    repo = recolorArtifact(repo, "middledeck/sofa", "#111111");
-    repo = stageAndCommit(repo, "middledeck/sofa", "Recolor sofa").repo;
+    repo = recolorArtifact(repo, "lowerdeck/sofa", "#111111");
+    repo = stageAndCommit(repo, "lowerdeck/sofa", "Recolor sofa").repo;
     const outcome = merge(repo, "feature");
     expect(outcome.conflicts).toHaveLength(0);
     const head = headCommit(outcome.repo);
     expect(head.parents).toHaveLength(2);
     expect(head.message).toBe("Merge branch 'feature'");
-    expect(head.tree["middledeck/table"].transform.position).toEqual([5, 3.4, 0]);
-    expect(head.tree["middledeck/sofa"].color).toBe("#111111");
+    expect(head.tree["lowerdeck/table"].transform.position).toEqual([5, 0.4, 0]);
+    expect(head.tree["lowerdeck/sofa"].color).toBe("#111111");
     expect(getStatus(outcome.repo).clean).toBe(true);
   });
 
@@ -191,11 +191,11 @@ describe("merge", () => {
     let repo = createInitialRepository();
     repo = createBranch(repo, "feature");
     repo = checkout(repo, "feature");
-    repo = removeWorkingArtifact(repo, "middledeck/sofa");
-    repo = stageAndCommit(repo, "middledeck/sofa", "Remove sofa").repo;
+    repo = removeWorkingArtifact(repo, "lowerdeck/sofa");
+    repo = stageAndCommit(repo, "lowerdeck/sofa", "Remove sofa").repo;
     repo = checkout(repo, "main");
-    repo = recolorArtifact(repo, "middledeck/sofa", "#ffcc00");
-    repo = stageAndCommit(repo, "middledeck/sofa", "Recolor sofa").repo;
+    repo = recolorArtifact(repo, "lowerdeck/sofa", "#ffcc00");
+    repo = stageAndCommit(repo, "lowerdeck/sofa", "Recolor sofa").repo;
     const outcome = merge(repo, "feature");
     expect(outcome.conflicts).toHaveLength(1);
     expect(outcome.conflicts[0]?.kind).toBe("modify-delete");
@@ -207,10 +207,10 @@ describe("merge", () => {
     let repo = createInitialRepository();
     repo = createBranch(repo, "feature");
     repo = checkout(repo, "feature");
-    repo = moveArtifact(repo, "middledeck/table", [5, 3.4, 0]);
-    repo = stageAndCommit(repo, "middledeck/table", "Move table").repo;
+    repo = moveArtifact(repo, "lowerdeck/table", [5, 0.4, 0]);
+    repo = stageAndCommit(repo, "lowerdeck/table", "Move table").repo;
     repo = checkout(repo, "main");
-    repo = moveArtifact(repo, "middledeck/table", [9, 3.4, 0]);
+    repo = moveArtifact(repo, "lowerdeck/table", [9, 0.4, 0]);
     expect(() => merge(repo, "feature")).toThrow(/local changes/);
   });
 });

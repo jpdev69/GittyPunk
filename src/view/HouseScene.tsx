@@ -12,7 +12,7 @@ import House from "./House";
 
 const HOUSE_BOX = new THREE.Box3(
   new THREE.Vector3(-5, -0.4, -5),
-  new THREE.Vector3(5, 15.2, 5),
+  new THREE.Vector3(5, 8.9, 5),
 );
 
 const COMPARE_BOX = new THREE.Box3(
@@ -196,7 +196,7 @@ export default function HouseScene() {
         orthographic
         shadows
         dpr={[1, 2]}
-        camera={{ position: [18, 13, 18], zoom: 46, near: -100, far: 400 }}
+        camera={{ position: [16, 10, 16], zoom: 44, near: -100, far: 400 }}
         onPointerMissed={() => {
           useAppStore.getState().select(null);
           useAppStore.getState().focusDeck(null);

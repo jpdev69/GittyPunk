@@ -23,20 +23,20 @@ describe("historyEntries", () => {
   it("lists every commit newest first with tips, HEAD, and unpushed marks", () => {
     let repo = createInitialRepository();
     repo = stageAndCommit(
-      moveArtifact(repo, "middledeck/table", [5, 3.4, 0]),
-      "middledeck/table",
+      moveArtifact(repo, "lowerdeck/table", [5, 0.4, 0]),
+      "lowerdeck/table",
       "Move table",
     ).repo;
     repo = runOk(repo, "git push");
     repo = stageAndCommit(
-      recolorArtifact(repo, "middledeck/sofa", "#111111"),
-      "middledeck/sofa",
+      recolorArtifact(repo, "lowerdeck/sofa", "#111111"),
+      "lowerdeck/sofa",
       "Recolor sofa",
     ).repo;
     repo = runOk(repo, "git checkout -b feature");
     repo = stageAndCommit(
-      addNewArtifact(repo, "middledeck/rug"),
-      "middledeck/rug",
+      addNewArtifact(repo, "lowerdeck/rug"),
+      "lowerdeck/rug",
       "Feature rug",
     ).repo;
 
@@ -69,8 +69,8 @@ describe("historyEntries", () => {
   it("marks unpushed only when the remote tracks the current branch", () => {
     let repo = createInitialRepository();
     repo = stageAndCommit(
-      recolorArtifact(repo, "middledeck/sofa", "#111111"),
-      "middledeck/sofa",
+      recolorArtifact(repo, "lowerdeck/sofa", "#111111"),
+      "lowerdeck/sofa",
       "Recolor sofa",
     ).repo;
     const beforePush = historyEntries(repo);
@@ -82,8 +82,8 @@ describe("historyEntries", () => {
     expect(afterPush[0]?.tips).toContain("origin/main");
 
     repo = stageAndCommit(
-      recolorArtifact(repo, "middledeck/sofa", "#222222"),
-      "middledeck/sofa",
+      recolorArtifact(repo, "lowerdeck/sofa", "#222222"),
+      "lowerdeck/sofa",
       "Recolor again",
     ).repo;
     const ahead = historyEntries(repo);
@@ -94,8 +94,8 @@ describe("historyEntries", () => {
   it("keeps working from a detached HEAD", () => {
     let repo = createInitialRepository();
     repo = stageAndCommit(
-      moveArtifact(repo, "middledeck/table", [5, 3.4, 0]),
-      "middledeck/table",
+      moveArtifact(repo, "lowerdeck/table", [5, 0.4, 0]),
+      "lowerdeck/table",
       "Move table",
     ).repo;
     const initialId = Object.values(repo.commits).find(

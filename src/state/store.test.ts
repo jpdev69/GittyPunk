@@ -23,17 +23,17 @@ describe("app store", () => {
 
   it("starts with the initial house as the working tree", () => {
     const { repo } = useAppStore.getState();
-    expect(Object.keys(repo.working)).toHaveLength(21);
+    expect(Object.keys(repo.working)).toHaveLength(19);
   });
 
   it("runs git commands through the parser and swaps in the new repo", () => {
     useAppStore.getState().runCommand("git rm table");
     const { repo, lines } = useAppStore.getState();
-    expect(repo.working["middledeck/table"]).toBeUndefined();
+    expect(repo.working["lowerdeck/table"]).toBeUndefined();
     expect(lines.at(-2)?.kind).toBe("input");
     expect(lines.at(-2)?.text).toBe("git rm table");
     expect(lines.at(-1)?.kind).toBe("output");
-    expect(lines.at(-1)?.text).toBe("rm 'middledeck/table'");
+    expect(lines.at(-1)?.text).toBe("rm 'lowerdeck/table'");
   });
 
   it("marks failed commands as error lines", () => {
@@ -55,10 +55,10 @@ describe("app store", () => {
 
   it("tracks selection and deck focus", () => {
     const { select, focusDeck } = useAppStore.getState();
-    select("middledeck/sofa");
+    select("lowerdeck/sofa");
     focusDeck("upperdeck");
     const selected = useAppStore.getState();
-    expect(selected.selected).toBe("middledeck/sofa");
+    expect(selected.selected).toBe("lowerdeck/sofa");
     expect(selected.focused).toBe("upperdeck");
     select(null);
     focusDeck(null);
@@ -111,16 +111,16 @@ describe("app store", () => {
     useAppStore.getState().runCommand("git checkout -b feature");
     let repo = useAppStore.getState().repo;
     repo = stageAndCommit(
-      recolorArtifact(repo, "middledeck/sofa", "#111111"),
-      "middledeck/sofa",
+      recolorArtifact(repo, "lowerdeck/sofa", "#111111"),
+      "lowerdeck/sofa",
       "Feature sofa",
     ).repo;
     useAppStore.setState({ repo });
     useAppStore.getState().runCommand("git checkout main");
     repo = useAppStore.getState().repo;
     repo = stageAndCommit(
-      recolorArtifact(repo, "middledeck/sofa", "#222222"),
-      "middledeck/sofa",
+      recolorArtifact(repo, "lowerdeck/sofa", "#222222"),
+      "lowerdeck/sofa",
       "Main sofa",
     ).repo;
     useAppStore.setState({ repo });

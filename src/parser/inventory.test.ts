@@ -36,10 +36,10 @@ function buildHarness(): {
   repo = push(repo).repo;
 
   const colleague = cloneFromBundle(bundleCreate(repo));
-  const colleagueMoved = moveArtifact(colleague, "middledeck/table", [5, 3.4, 0]);
+  const colleagueMoved = moveArtifact(colleague, "lowerdeck/table", [5, 0.4, 0]);
   const colleagueCommitted = stageAndCommit(
     colleagueMoved,
-    "middledeck/table",
+    "lowerdeck/table",
     "Colleague move",
   ).repo;
   repo = applyOriginUpdate(repo, push(colleagueCommitted).repo.origin);
@@ -51,34 +51,34 @@ function buildHarness(): {
   repo = stageAndCommit(repo, "upperdeck/bed", "Feature bed").repo;
   repo = checkout(repo, "main");
 
-  repo = addNewArtifact(repo, "middledeck/rug", "#ff8800");
-  repo = moveArtifact(repo, "middledeck/tv", [1, 3.6, 2]);
-  repo = stage(repo, "middledeck/rug");
-  repo = stage(repo, "middledeck/tv");
+  repo = addNewArtifact(repo, "lowerdeck/rug", "#ff8800");
+  repo = moveArtifact(repo, "lowerdeck/tv", [1, 0.6, 2]);
+  repo = stage(repo, "lowerdeck/rug");
+  repo = stage(repo, "lowerdeck/tv");
   repo = commit(repo, { message: "Rug and tv" }).repo;
-  repo = recolorArtifact(repo, "middledeck/sofa", "#112233");
-  repo = stageAndCommit(repo, "middledeck/sofa", "Recolor sofa").repo;
+  repo = recolorArtifact(repo, "lowerdeck/sofa", "#112233");
+  repo = stageAndCommit(repo, "lowerdeck/sofa", "Recolor sofa").repo;
 
   const env: ExecutionEnv = {
     bundles: { "house-backup.bundle": bundleCreate(repo) },
   };
 
   let dirty = repo;
-  dirty = recolorArtifact(dirty, "middledeck/chair", "#ffaa00");
-  dirty = stage(dirty, "middledeck/chair");
+  dirty = recolorArtifact(dirty, "lowerdeck/chair", "#ffaa00");
+  dirty = stage(dirty, "lowerdeck/chair");
   dirty = hideArtifact(dirty, "upperdeck/lamp");
-  dirty = addNewArtifact(dirty, "middledeck/mat");
+  dirty = addNewArtifact(dirty, "lowerdeck/mat");
 
   return { clean: repo, dirty, env };
 }
 
 function fillPlaceholders(line: string, sha: string): string {
   const map: Record<string, string> = {
-    "<specific files>": "middledeck/table",
-    "<file>": "middledeck/table",
+    "<specific files>": "lowerdeck/table",
+    "<file>": "lowerdeck/table",
     "<message>": "Harness commit",
     "<sha>": sha,
-    "<path>": "middledeck/rug",
+    "<path>": "lowerdeck/rug",
     "<other-tip>": "main",
     "<merge-base>": "HEAD",
     "<branch>": "feature",
@@ -167,8 +167,8 @@ describe("original command inventory", () => {
       emptyEnv(),
     );
     expect(status.output).toEqual([
-      "M  middledeck/chair",
-      "?? middledeck/mat",
+      "M  lowerdeck/chair",
+      "?? lowerdeck/mat",
       " M upperdeck/lamp",
     ]);
 

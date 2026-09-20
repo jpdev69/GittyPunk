@@ -16,8 +16,8 @@ describe("scripted scenario: stage, commit, branch, merge, resolve, push", () =>
   it("runs the full plan scenario", () => {
     let repo = createInitialRepository();
 
-    repo = moveArtifact(repo, "middledeck/table", [5, 3.4, 0]);
-    repo = stageAndCommit(repo, "middledeck/table", "Move table").repo;
+    repo = moveArtifact(repo, "lowerdeck/table", [5, 0.4, 0]);
+    repo = stageAndCommit(repo, "lowerdeck/table", "Move table").repo;
     expect(getStatus(repo).clean).toBe(true);
 
     repo = createBranch(repo, "feature/upside-down");

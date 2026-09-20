@@ -21,8 +21,8 @@ import type { Repository, RemoteHouse } from "./types";
 
 function colleagueDiverge(base: Repository): { origin: RemoteHouse } {
   const colleague = cloneFromBundle(bundleCreate(base));
-  const moved = moveArtifact(colleague, "middledeck/table", [5, 3.4, 0]);
-  const committed = stageAndCommit(moved, "middledeck/table", "Colleague move").repo;
+  const moved = moveArtifact(colleague, "lowerdeck/table", [5, 0.4, 0]);
+  const committed = stageAndCommit(moved, "lowerdeck/table", "Colleague move").repo;
   const pushed = push(committed);
   return { origin: pushed.repo.origin };
 }
@@ -47,8 +47,8 @@ describe("push", () => {
     let repo = createInitialRepository();
     repo = push(repo).repo;
     repo = applyOriginUpdate(repo, colleagueDiverge(repo).origin);
-    repo = recolorArtifact(repo, "middledeck/sofa", "#111111");
-    repo = stageAndCommit(repo, "middledeck/sofa", "Local sofa").repo;
+    repo = recolorArtifact(repo, "lowerdeck/sofa", "#111111");
+    repo = stageAndCommit(repo, "lowerdeck/sofa", "Local sofa").repo;
     expect(() => push(repo)).toThrow(/non-fast-forward/);
   });
 
@@ -56,8 +56,8 @@ describe("push", () => {
     let repo = createInitialRepository();
     repo = push(repo).repo;
     repo = applyOriginUpdate(repo, colleagueDiverge(repo).origin);
-    repo = recolorArtifact(repo, "middledeck/sofa", "#111111");
-    repo = stageAndCommit(repo, "middledeck/sofa", "Local sofa").repo;
+    repo = recolorArtifact(repo, "lowerdeck/sofa", "#111111");
+    repo = stageAndCommit(repo, "lowerdeck/sofa", "Local sofa").repo;
     expect(() => push(repo, { forceWithLease: true })).toThrow(/stale info/);
     repo = fetch(repo).repo;
     const forced = push(repo, { forceWithLease: true });
@@ -91,7 +91,7 @@ describe("fetch and pull", () => {
     repo = applyOriginUpdate(repo, origin);
     const outcome = pull(repo);
     expect(outcome.fastForward).toBe(true);
-    expect(outcome.repo.working["middledeck/table"].transform.position).toEqual([5, 3.4, 0]);
+    expect(outcome.repo.working["lowerdeck/table"].transform.position).toEqual([5, 0.4, 0]);
     expect(getStatus(outcome.repo).clean).toBe(true);
     expect(outcome.repo.branches["main"]).toBe(origin.branches["main"]);
   });
@@ -101,8 +101,8 @@ describe("fetch and pull", () => {
     repo = push(repo).repo;
     const origin = colleagueDiverge(repo).origin;
     repo = applyOriginUpdate(repo, origin);
-    repo = recolorArtifact(repo, "middledeck/sofa", "#111111");
-    repo = stageAndCommit(repo, "middledeck/sofa", "Local sofa").repo;
+    repo = recolorArtifact(repo, "lowerdeck/sofa", "#111111");
+    repo = stageAndCommit(repo, "lowerdeck/sofa", "Local sofa").repo;
     repo = setConfig(repo, "pull.rebase", "true");
     const outcome = pull(repo);
     expect("replayed" in outcome).toBe(true);
@@ -111,8 +111,8 @@ describe("fetch and pull", () => {
     const head = headCommit(outcome.repo);
     expect(head.message).toBe("Local sofa");
     expect(head.parents[0]).toBe(origin.branches["main"]);
-    expect(head.tree["middledeck/table"].transform.position).toEqual([5, 3.4, 0]);
-    expect(head.tree["middledeck/sofa"].color).toBe("#111111");
+    expect(head.tree["lowerdeck/table"].transform.position).toEqual([5, 0.4, 0]);
+    expect(head.tree["lowerdeck/sofa"].color).toBe("#111111");
   });
 
   it("pull without upstream errors", () => {
@@ -124,19 +124,19 @@ describe("fetch and pull", () => {
     let repo = createInitialRepository();
     repo = push(repo).repo;
     const colleague = cloneFromBundle(bundleCreate(repo));
-    const colleagueMoved = recolorArtifact(colleague, "middledeck/sofa", "#00ff00");
+    const colleagueMoved = recolorArtifact(colleague, "lowerdeck/sofa", "#00ff00");
     const colleaguePushed = push(
-      stageAndCommit(colleagueMoved, "middledeck/sofa", "Colleague sofa").repo,
+      stageAndCommit(colleagueMoved, "lowerdeck/sofa", "Colleague sofa").repo,
     );
     repo = applyOriginUpdate(repo, colleaguePushed.repo.origin);
-    repo = recolorArtifact(repo, "middledeck/sofa", "#ff0000");
-    repo = stageAndCommit(repo, "middledeck/sofa", "Local sofa").repo;
+    repo = recolorArtifact(repo, "lowerdeck/sofa", "#ff0000");
+    repo = stageAndCommit(repo, "lowerdeck/sofa", "Local sofa").repo;
     const outcome = pull(repo);
     expect(outcome.conflicts).toHaveLength(1);
-    const merged = resolveConflict(outcome.repo, "middledeck/sofa", "theirs");
+    const merged = resolveConflict(outcome.repo, "lowerdeck/sofa", "theirs");
     const done = commit(merged, {});
     expect(done.commit.parents).toHaveLength(2);
-    expect(done.commit.tree["middledeck/sofa"].color).toBe("#00ff00");
+    expect(done.commit.tree["lowerdeck/sofa"].color).toBe("#00ff00");
     expect(getStatus(done.repo).clean).toBe(true);
   });
 });
@@ -144,8 +144,8 @@ describe("fetch and pull", () => {
 describe("bundle create and clone", () => {
   it("round-trips history through a bundle", () => {
     let repo = createInitialRepository();
-    repo = moveArtifact(repo, "middledeck/table", [5, 3.4, 0]);
-    repo = stageAndCommit(repo, "middledeck/table", "Move table").repo;
+    repo = moveArtifact(repo, "lowerdeck/table", [5, 0.4, 0]);
+    repo = stageAndCommit(repo, "lowerdeck/table", "Move table").repo;
     repo = push(repo).repo;
     const bundle = bundleCreate(repo);
     const clone = cloneFromBundle(bundle);
@@ -153,8 +153,8 @@ describe("bundle create and clone", () => {
     expect(log(clone, {}).map((c) => c.message)).toEqual(["Move table", "Initial house"]);
     expect(clone.remoteTracking["origin/main"]).toBe(repo.branches["main"]);
     expect(currentBranch(clone)).toBe("main");
-    const cloneChanged = recolorArtifact(clone, "middledeck/sofa", "#123456");
-    const pushed = push(stageAndCommit(cloneChanged, "middledeck/sofa", "Clone change").repo);
+    const cloneChanged = recolorArtifact(clone, "lowerdeck/sofa", "#123456");
+    const pushed = push(stageAndCommit(cloneChanged, "lowerdeck/sofa", "Clone change").repo);
     expect(pushed.updated).toBe(true);
   });
 

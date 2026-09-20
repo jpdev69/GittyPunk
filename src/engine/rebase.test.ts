@@ -10,13 +10,13 @@ function makeDiverged(): Repository {
   let repo = createInitialRepository();
   repo = createBranch(repo, "feature");
   repo = checkout(repo, "feature");
-  repo = moveArtifact(repo, "middledeck/table", [5, 3.4, 0]);
-  repo = stageAndCommit(repo, "middledeck/table", "Move table").repo;
-  repo = recolorArtifact(repo, "middledeck/tv", "#222222");
-  repo = stageAndCommit(repo, "middledeck/tv", "Recolor tv").repo;
+  repo = moveArtifact(repo, "lowerdeck/table", [5, 0.4, 0]);
+  repo = stageAndCommit(repo, "lowerdeck/table", "Move table").repo;
+  repo = recolorArtifact(repo, "lowerdeck/tv", "#222222");
+  repo = stageAndCommit(repo, "lowerdeck/tv", "Recolor tv").repo;
   repo = checkout(repo, "main");
-  repo = recolorArtifact(repo, "middledeck/sofa", "#111111");
-  repo = stageAndCommit(repo, "middledeck/sofa", "Recolor sofa").repo;
+  repo = recolorArtifact(repo, "lowerdeck/sofa", "#111111");
+  repo = stageAndCommit(repo, "lowerdeck/sofa", "Recolor sofa").repo;
   return checkout(repo, "feature");
 }
 
@@ -33,9 +33,9 @@ describe("rebase", () => {
     expect(replayedTable?.parents[0]).toBe(mainTip);
     const messages = logQuery(outcome.repo, { revs: ["feature"] }).map((c) => c.message);
     expect(messages).toEqual(["Recolor tv", "Move table", "Recolor sofa", "Initial house"]);
-    expect(head.tree["middledeck/table"].transform.position).toEqual([5, 3.4, 0]);
-    expect(head.tree["middledeck/tv"].color).toBe("#222222");
-    expect(head.tree["middledeck/sofa"].color).toBe("#111111");
+    expect(head.tree["lowerdeck/table"].transform.position).toEqual([5, 0.4, 0]);
+    expect(head.tree["lowerdeck/tv"].color).toBe("#222222");
+    expect(head.tree["lowerdeck/sofa"].color).toBe("#111111");
     expect(getStatus(outcome.repo).clean).toBe(true);
   });
 
@@ -49,7 +49,7 @@ describe("rebase", () => {
     const head = headCommit(outcome.repo);
     const replayedFirst = outcome.repo.commits[head.parents[0] as string];
     expect(replayedFirst?.parents[0]).toBe(outcome.repo.branches["main"]);
-    expect(head.tree["middledeck/sofa"].color).toBe("#111111");
+    expect(head.tree["lowerdeck/sofa"].color).toBe("#111111");
   });
 
   it("drops requested commits like an interactive rebase", () => {
@@ -59,18 +59,18 @@ describe("rebase", () => {
     const messages = logQuery(outcome.repo, { revs: ["feature"] }).map((c) => c.message);
     expect(messages).not.toContain("Move table");
     expect(messages).toContain("Recolor tv");
-    expect(headCommit(outcome.repo).tree["middledeck/table"].transform.position).toEqual([0, 3.4, 0]);
+    expect(headCommit(outcome.repo).tree["lowerdeck/table"].transform.position).toEqual([0, 0.4, 0]);
   });
 
   it("stops on conflicts and continues after resolution", () => {
     let repo = createInitialRepository();
     repo = createBranch(repo, "feature");
     repo = checkout(repo, "feature");
-    repo = recolorArtifact(repo, "middledeck/sofa", "#00ff00");
-    repo = stageAndCommit(repo, "middledeck/sofa", "Feature sofa").repo;
+    repo = recolorArtifact(repo, "lowerdeck/sofa", "#00ff00");
+    repo = stageAndCommit(repo, "lowerdeck/sofa", "Feature sofa").repo;
     repo = checkout(repo, "main");
-    repo = recolorArtifact(repo, "middledeck/sofa", "#ff0000");
-    repo = stageAndCommit(repo, "middledeck/sofa", "Main sofa").repo;
+    repo = recolorArtifact(repo, "lowerdeck/sofa", "#ff0000");
+    repo = stageAndCommit(repo, "lowerdeck/sofa", "Main sofa").repo;
     repo = checkout(repo, "feature");
     const mainTip = repo.branches["main"];
     const outcome = rebase(repo, { onto: "main" });
@@ -78,14 +78,14 @@ describe("rebase", () => {
     expect(outcome.conflicts[0]?.kind).toBe("both-modified");
     expect(outcome.repo.rebase).not.toBeNull();
     const status = getStatus(outcome.repo);
-    const entry = status.entries.find((entry) => entry.path === "middledeck/sofa");
+    const entry = status.entries.find((entry) => entry.path === "lowerdeck/sofa");
     expect(entry?.worktree).toBe("conflict");
-    const mid = resolveConflict(outcome.repo, "middledeck/sofa", "theirs");
+    const mid = resolveConflict(outcome.repo, "lowerdeck/sofa", "theirs");
     const done = rebaseContinue(mid);
     expect(done.conflicts).toHaveLength(0);
     expect(done.repo.rebase).toBeNull();
     const head = headCommit(done.repo);
-    expect(head.tree["middledeck/sofa"].color).toBe("#00ff00");
+    expect(head.tree["lowerdeck/sofa"].color).toBe("#00ff00");
     expect(head.parents[0]).toBe(mainTip);
     expect(head.message).toBe("Feature sofa");
     expect(getStatus(done.repo).clean).toBe(true);
@@ -95,11 +95,11 @@ describe("rebase", () => {
     let repo = createInitialRepository();
     repo = createBranch(repo, "feature");
     repo = checkout(repo, "feature");
-    repo = recolorArtifact(repo, "middledeck/sofa", "#00ff00");
-    repo = stageAndCommit(repo, "middledeck/sofa", "Feature sofa").repo;
+    repo = recolorArtifact(repo, "lowerdeck/sofa", "#00ff00");
+    repo = stageAndCommit(repo, "lowerdeck/sofa", "Feature sofa").repo;
     repo = checkout(repo, "main");
-    repo = recolorArtifact(repo, "middledeck/sofa", "#ff0000");
-    repo = stageAndCommit(repo, "middledeck/sofa", "Main sofa").repo;
+    repo = recolorArtifact(repo, "lowerdeck/sofa", "#ff0000");
+    repo = stageAndCommit(repo, "lowerdeck/sofa", "Main sofa").repo;
     repo = checkout(repo, "feature");
     const featureTip = repo.branches["feature"];
     const outcome = rebase(repo, { onto: "main" });
@@ -107,13 +107,13 @@ describe("rebase", () => {
     expect(restored.rebase).toBeNull();
     expect(getStatus(restored).clean).toBe(true);
     expect(restored.branches["feature"]).toBe(featureTip);
-    expect(restored.working["middledeck/sofa"].color).toBe("#00ff00");
+    expect(restored.working["lowerdeck/sofa"].color).toBe("#00ff00");
   });
 
   it("refuses to rebase with uncommitted changes", () => {
     let repo = makeDiverged();
     repo = checkout(repo, "feature");
-    repo = moveArtifact(repo, "middledeck/chair", [2, 3.4, 2]);
+    repo = moveArtifact(repo, "lowerdeck/chair", [2, 0.4, 2]);
     expect(() => rebase(repo, { onto: "main" })).toThrow(/unstaged changes/);
   });
 

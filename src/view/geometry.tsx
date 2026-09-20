@@ -86,19 +86,40 @@ function Piece({ surface, position, rotation, children }: PieceProps) {
   );
 }
 
+interface DividerSpec {
+  position: Vec3Tuple;
+  size: Vec3Tuple;
+}
+
+const UPPER_DIVIDERS: DividerSpec[] = [
+  { position: [-2.1, 1.0, 0.8], size: [1.4, 1.2, 0.16] },
+  { position: [1.2, 1.0, 0.8], size: [3.2, 1.2, 0.16] },
+];
+
 function WallsPiece({ surface }: { surface: PieceSurface }) {
   return (
-    <mesh position={[0, 0.5, 0]} renderOrder={1}>
-      <boxGeometry args={[5.6, 13, 5.6]} />
-      <meshToonMaterial
-        color={surface.color}
-        gradientMap={gradientMap}
-        transparent
-        opacity={0.13}
-        depthWrite={false}
-        side={THREE.DoubleSide}
-      />
-    </mesh>
+    <group>
+      <mesh position={[0, -3, 0]} renderOrder={1} raycast={() => null}>
+        <boxGeometry args={[5.6, 6, 5.6]} />
+        <meshToonMaterial
+          color={surface.color}
+          gradientMap={gradientMap}
+          transparent
+          opacity={0.13}
+          depthWrite={false}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+      {UPPER_DIVIDERS.map((divider, index) => (
+        <Piece
+          key={index}
+          surface={surface}
+          position={divider.position}
+        >
+          <boxGeometry args={divider.size} />
+        </Piece>
+      ))}
+    </group>
   );
 }
 
@@ -126,10 +147,15 @@ export function ArtifactGeometry({ kind, surface }: ArtifactGeometryProps) {
     case "walls":
       return <WallsPiece surface={surface} />;
     case "roof":
-      return piece(
-        [0, 0.8, 0],
-        <coneGeometry args={[4.1, 1.7, 4]} />,
-        [0, Math.PI / 4, 0],
+      return (
+        <>
+          {piece(
+            [0, 0.8, 0],
+            <coneGeometry args={[4.6, 1.5, 4]} />,
+            [0, Math.PI / 4, 0],
+          )}
+          {piece([1.7, 0.95, -0.7], <boxGeometry args={[0.5, 1.1, 0.5]} />)}
+        </>
       );
     case "stairs":
       return (
@@ -148,11 +174,13 @@ export function ArtifactGeometry({ kind, surface }: ArtifactGeometryProps) {
     case "windows":
       return (
         <>
-          {[-1.55, 0, 1.55].map((x) => (
-            <Piece key={x} surface={surface} position={[x, 0, -1.15]}>
-              <boxGeometry args={[0.95, 1.15, 0.12]} />
-            </Piece>
-          ))}
+          {[0, 3].flatMap((row) =>
+            [-1.55, 0, 1.55].map((x) => (
+              <Piece key={`${row}:${x}`} surface={surface} position={[x, row, -1.15]}>
+                <boxGeometry args={[0.95, 1.15, 0.12]} />
+              </Piece>
+            )),
+          )}
         </>
       );
     case "table":

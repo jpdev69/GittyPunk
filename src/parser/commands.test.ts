@@ -43,8 +43,8 @@ function runOk(
 
 function colleagueDiverge(base: Repository): RemoteHouse {
   const colleague = cloneFromBundle(bundleCreate(base));
-  const moved = moveArtifact(colleague, "middledeck/table", [5, 3.4, 0]);
-  const committed = stageAndCommit(moved, "middledeck/table", "Colleague move").repo;
+  const moved = moveArtifact(colleague, "lowerdeck/table", [5, 0.4, 0]);
+  const committed = stageAndCommit(moved, "lowerdeck/table", "Colleague move").repo;
   return push(committed).repo.origin;
 }
 
@@ -60,24 +60,24 @@ describe("git status", () => {
 
   it("shows staged, unstaged, and untracked entries with --short", () => {
     let repo = createInitialRepository();
-    repo = recolorArtifact(repo, "middledeck/chair", "#ffaa00");
-    repo = stage(repo, "middledeck/chair");
+    repo = recolorArtifact(repo, "lowerdeck/chair", "#ffaa00");
+    repo = stage(repo, "lowerdeck/chair");
     repo = hideArtifact(repo, "upperdeck/lamp");
-    repo = addNewArtifact(repo, "middledeck/mat");
+    repo = addNewArtifact(repo, "lowerdeck/mat");
     const result = runOk(repo, "git status --short");
     expect(result.output).toEqual([
-      "M  middledeck/chair",
-      "?? middledeck/mat",
+      "M  lowerdeck/chair",
+      "?? lowerdeck/mat",
       " M upperdeck/lamp",
     ]);
   });
 
   it("renders the long-format sections", () => {
     let repo = createInitialRepository();
-    repo = recolorArtifact(repo, "middledeck/chair", "#ffaa00");
-    repo = stage(repo, "middledeck/chair");
+    repo = recolorArtifact(repo, "lowerdeck/chair", "#ffaa00");
+    repo = stage(repo, "lowerdeck/chair");
     repo = hideArtifact(repo, "upperdeck/lamp");
-    repo = addNewArtifact(repo, "middledeck/mat");
+    repo = addNewArtifact(repo, "lowerdeck/mat");
     const text = runOk(repo, "git status").output.join("\n");
     expect(text).toContain("Changes to be committed:");
     expect(text).toContain("Changes not staged for commit:");
@@ -88,7 +88,7 @@ describe("git status", () => {
   it("ends with the no-changes hint when nothing is staged", () => {
     let repo = createInitialRepository();
     repo = hideArtifact(repo, "upperdeck/lamp");
-    repo = addNewArtifact(repo, "middledeck/mat");
+    repo = addNewArtifact(repo, "lowerdeck/mat");
     const text = runOk(repo, "git status").output.join("\n");
     expect(text).toContain(
       'no changes added to commit (use "git add" and/or "git commit -a")',
@@ -107,8 +107,8 @@ describe("git status", () => {
 describe("git add and git commit", () => {
   it("stages a path and commits with a quoted message", () => {
     let repo = createInitialRepository();
-    repo = moveArtifact(repo, "middledeck/table", [2, 3.4, 0]);
-    repo = runOk(repo, "git add middledeck/table").repo;
+    repo = moveArtifact(repo, "lowerdeck/table", [2, 0.4, 0]);
+    repo = runOk(repo, "git add lowerdeck/table").repo;
     const result = runOk(repo, 'git commit -m "Move the table"');
     expect(result.output[0]).toMatch(/^\[main [0-9a-f]{7}\] Move the table$/);
     expect(result.output[1]).toBe(" 1 artifact changed");
@@ -116,7 +116,7 @@ describe("git add and git commit", () => {
 
   it("stages everything with git add .", () => {
     let repo = createInitialRepository();
-    repo = addNewArtifact(repo, "middledeck/mat");
+    repo = addNewArtifact(repo, "lowerdeck/mat");
     repo = runOk(repo, "git add .").repo;
     const result = runOk(repo, 'git commit -m "Add mat"');
     expect(result.output[1]).toBe(" 1 artifact changed");
@@ -124,25 +124,25 @@ describe("git add and git commit", () => {
 
   it("stages all changes with the simplified -p picker", () => {
     let repo = createInitialRepository();
-    repo = recolorArtifact(repo, "middledeck/sofa", "#123456");
+    repo = recolorArtifact(repo, "lowerdeck/sofa", "#123456");
     const result = runOk(repo, "git add -p");
     expect(result.output).toEqual([
-      " middledeck/sofa | color",
+      " lowerdeck/sofa | color",
       "1 artifact change staged (simplified patch picker)",
     ]);
     const status = runOk(result.repo, "git status --short");
-    expect(status.output).toEqual(["M  middledeck/sofa"]);
+    expect(status.output).toEqual(["M  lowerdeck/sofa"]);
   });
 
   it("keeps the message when amending without -m", () => {
     let repo = createInitialRepository();
     repo = stageAndCommit(
-      recolorArtifact(repo, "middledeck/sofa", "#111111"),
-      "middledeck/sofa",
+      recolorArtifact(repo, "lowerdeck/sofa", "#111111"),
+      "lowerdeck/sofa",
       "Original message",
     ).repo;
-    repo = recolorArtifact(repo, "middledeck/sofa", "#abcdef");
-    repo = stage(repo, "middledeck/sofa");
+    repo = recolorArtifact(repo, "lowerdeck/sofa", "#abcdef");
+    repo = stage(repo, "lowerdeck/sofa");
     const result = runOk(repo, "git commit --amend");
     expect(result.output[0]).toContain("Original message");
     expect(Object.keys(result.repo.commits)).toHaveLength(3);
@@ -152,12 +152,12 @@ describe("git add and git commit", () => {
   it("replaces the message with --amend -m", () => {
     let repo = createInitialRepository();
     repo = stageAndCommit(
-      recolorArtifact(repo, "middledeck/sofa", "#111111"),
-      "middledeck/sofa",
+      recolorArtifact(repo, "lowerdeck/sofa", "#111111"),
+      "lowerdeck/sofa",
       "Original message",
     ).repo;
-    repo = recolorArtifact(repo, "middledeck/sofa", "#abcdef");
-    repo = stage(repo, "middledeck/sofa");
+    repo = recolorArtifact(repo, "lowerdeck/sofa", "#abcdef");
+    repo = stage(repo, "lowerdeck/sofa");
     const result = runOk(repo, 'git commit --amend -m "New message"');
     expect(result.output[0]).toContain("New message");
     expect(headCommit(result.repo).message).toBe("New message");
@@ -174,50 +174,50 @@ describe("git add and git commit", () => {
 
   it("commits tracked changes with -a but leaves untracked files", () => {
     let repo = createInitialRepository();
-    repo = recolorArtifact(repo, "middledeck/chair", "#654321");
-    repo = addNewArtifact(repo, "middledeck/mat");
+    repo = recolorArtifact(repo, "lowerdeck/chair", "#654321");
+    repo = addNewArtifact(repo, "lowerdeck/mat");
     const result = runOk(repo, 'git commit -a -m "All tracked"');
     expect(result.output[1]).toBe(" 1 artifact changed");
     const status = runOk(result.repo, "git status --short");
-    expect(status.output).toEqual(["?? middledeck/mat"]);
+    expect(status.output).toEqual(["?? lowerdeck/mat"]);
   });
 });
 
 describe("git rm and git restore", () => {
   it("removes an artifact from index and working tree", () => {
     const repo = createInitialRepository();
-    const result = runOk(repo, "git rm middledeck/table");
-    expect(result.output).toEqual(["rm 'middledeck/table'"]);
-    expect(result.repo.index["middledeck/table"]).toBeUndefined();
-    expect(result.repo.working["middledeck/table"]).toBeUndefined();
+    const result = runOk(repo, "git rm lowerdeck/table");
+    expect(result.output).toEqual(["rm 'lowerdeck/table'"]);
+    expect(result.repo.index["lowerdeck/table"]).toBeUndefined();
+    expect(result.repo.working["lowerdeck/table"]).toBeUndefined();
   });
 
   it("keeps the working copy with --cached", () => {
     const repo = createInitialRepository();
-    const result = runOk(repo, "git rm --cached middledeck/table");
-    expect(result.output).toEqual(["rm 'middledeck/table'"]);
-    expect(result.repo.index["middledeck/table"]).toBeUndefined();
-    expect(result.repo.working["middledeck/table"]).toBeDefined();
+    const result = runOk(repo, "git rm --cached lowerdeck/table");
+    expect(result.output).toEqual(["rm 'lowerdeck/table'"]);
+    expect(result.repo.index["lowerdeck/table"]).toBeUndefined();
+    expect(result.repo.working["lowerdeck/table"]).toBeDefined();
   });
 
   it("requires -r to remove a component", () => {
     const repo = createInitialRepository();
-    const refused = run(repo, "git rm middledeck");
+    const refused = run(repo, "git rm lowerdeck");
     expect(refused.error).toBe(true);
     expect(refused.output.join("\n")).toContain(
-      "not removing 'middledeck' recursively without -r",
+      "not removing 'lowerdeck' recursively without -r",
     );
-    const removed = runOk(repo, "git rm -r middledeck");
-    expect(removed.output).toEqual(["rm 'middledeck'"]);
-    expect(removed.repo.working["middledeck/chair"]).toBeUndefined();
+    const removed = runOk(repo, "git rm -r lowerdeck");
+    expect(removed.output).toEqual(["rm 'lowerdeck'"]);
+    expect(removed.repo.working["lowerdeck/chair"]).toBeUndefined();
   });
 
   it("accepts the game aliases --object and --file", () => {
     const repo = createInitialRepository();
     const aliased = runOk(repo, "git rm --object table");
-    expect(aliased.output).toEqual(["rm 'middledeck/table'"]);
+    expect(aliased.output).toEqual(["rm 'lowerdeck/table'"]);
     const plain = runOk(repo, "git rm table");
-    expect(plain.output).toEqual(["rm 'middledeck/table'"]);
+    expect(plain.output).toEqual(["rm 'lowerdeck/table'"]);
   });
 
   it("restores an unstaged change from the index", () => {
@@ -229,11 +229,11 @@ describe("git rm and git restore", () => {
 
   it("unstages with restore --staged", () => {
     let repo = createInitialRepository();
-    repo = recolorArtifact(repo, "middledeck/chair", "#ffaa00");
-    repo = stage(repo, "middledeck/chair");
-    const result = runOk(repo, "git restore --staged middledeck/chair");
-    expect(result.repo.index["middledeck/chair"]?.color).toBe("#c58a4e");
-    expect(result.repo.working["middledeck/chair"]?.color).toBe("#ffaa00");
+    repo = recolorArtifact(repo, "lowerdeck/chair", "#ffaa00");
+    repo = stage(repo, "lowerdeck/chair");
+    const result = runOk(repo, "git restore --staged lowerdeck/chair");
+    expect(result.repo.index["lowerdeck/chair"]?.color).toBe("#c58a4e");
+    expect(result.repo.working["lowerdeck/chair"]?.color).toBe("#ffaa00");
   });
 });
 
@@ -251,8 +251,8 @@ describe("git diff", () => {
 
   it("shows staged changes with --cached", () => {
     let repo = createInitialRepository();
-    repo = recolorArtifact(repo, "middledeck/chair", "#123123");
-    repo = stage(repo, "middledeck/chair");
+    repo = recolorArtifact(repo, "lowerdeck/chair", "#123123");
+    repo = stage(repo, "lowerdeck/chair");
     const text = runOk(repo, "git diff --cached").output.join("\n");
     expect(text).toContain("@@ color @@");
   });
@@ -260,8 +260,8 @@ describe("git diff", () => {
   it("compares two revisions", () => {
     let repo = createInitialRepository();
     repo = stageAndCommit(
-      moveArtifact(repo, "middledeck/table", [2, 3.4, 0]),
-      "middledeck/table",
+      moveArtifact(repo, "lowerdeck/table", [2, 0.4, 0]),
+      "lowerdeck/table",
       "Move table",
     ).repo;
     const text = runOk(repo, "git diff HEAD~1 HEAD").output.join("\n");
@@ -270,9 +270,9 @@ describe("git diff", () => {
 
   it("renders new artifacts in diff output", () => {
     let repo = createInitialRepository();
-    repo = addNewArtifact(repo, "middledeck/mat");
+    repo = addNewArtifact(repo, "lowerdeck/mat");
     const text = runOk(repo, "git diff").output.join("\n");
-    expect(text).toContain("new artifact middledeck/mat");
+    expect(text).toContain("new artifact lowerdeck/mat");
     expect(text).toContain("--- /dev/null");
   });
 });
@@ -281,8 +281,8 @@ describe("git log, git show, and git ls-tree", () => {
   it("lists commits oneline", () => {
     let repo = createInitialRepository();
     repo = stageAndCommit(
-      recolorArtifact(repo, "middledeck/sofa", "#112233"),
-      "middledeck/sofa",
+      recolorArtifact(repo, "lowerdeck/sofa", "#112233"),
+      "lowerdeck/sofa",
       "Recolor sofa",
     ).repo;
     const result = runOk(repo, "git log --oneline");
@@ -295,8 +295,8 @@ describe("git log, git show, and git ls-tree", () => {
     let repo = createInitialRepository();
     repo = push(repo).repo;
     repo = stageAndCommit(
-      recolorArtifact(repo, "middledeck/sofa", "#112233"),
-      "middledeck/sofa",
+      recolorArtifact(repo, "lowerdeck/sofa", "#112233"),
+      "lowerdeck/sofa",
       "Local one",
     ).repo;
     const result = runOk(repo, "git log origin/main..main --oneline");
@@ -307,8 +307,8 @@ describe("git log, git show, and git ls-tree", () => {
   it("filters --all logs by path after --", () => {
     let repo = createInitialRepository();
     repo = stageAndCommit(
-      addNewArtifact(repo, "middledeck/rug"),
-      "middledeck/rug",
+      addNewArtifact(repo, "lowerdeck/rug"),
+      "lowerdeck/rug",
       "Add rug",
     ).repo;
     repo = runOk(repo, "git checkout -b feature HEAD~1").repo;
@@ -317,7 +317,7 @@ describe("git log, git show, and git ls-tree", () => {
       "upperdeck/bed",
       "Feature bed",
     ).repo;
-    const result = runOk(repo, "git log --all --oneline -- middledeck/rug");
+    const result = runOk(repo, "git log --all --oneline -- lowerdeck/rug");
     expect(result.output).toHaveLength(1);
     expect(result.output[0]).toContain("Add rug");
   });
@@ -325,14 +325,14 @@ describe("git log, git show, and git ls-tree", () => {
   it("shows a commit with --stat and as a diff", () => {
     let repo = createInitialRepository();
     repo = stageAndCommit(
-      recolorArtifact(repo, "middledeck/sofa", "#112233"),
-      "middledeck/sofa",
+      recolorArtifact(repo, "lowerdeck/sofa", "#112233"),
+      "lowerdeck/sofa",
       "Recolor sofa",
     ).repo;
     const sha = headCommit(repo).id;
     const stat = runOk(repo, `git show ${sha} --stat`).output.join("\n");
     expect(stat).toContain("commit ");
-    expect(stat).toContain(" middledeck/sofa | color");
+    expect(stat).toContain(" lowerdeck/sofa | color");
     const body = runOk(repo, `git show ${sha}`).output.join("\n");
     expect(body).toContain("@@ color @@");
   });
@@ -340,10 +340,10 @@ describe("git log, git show, and git ls-tree", () => {
   it("lists tree entries with and without --name-only", () => {
     const repo = createInitialRepository();
     const names = runOk(repo, "git ls-tree HEAD --name-only").output;
-    expect(names).toContain("middledeck/sofa");
+    expect(names).toContain("lowerdeck/sofa");
     const full = runOk(repo, "git ls-tree HEAD").output;
-    expect(full).toContain("component middledeck");
-    expect(full).toContain("artifact middledeck/sofa");
+    expect(full).toContain("component lowerdeck");
+    expect(full).toContain("artifact lowerdeck/sofa");
   });
 
   it("lists staged paths with ls-files", () => {
@@ -442,8 +442,8 @@ describe("git merge", () => {
   it("creates a merge commit for diverged branches", () => {
     let repo = createInitialRepository();
     repo = stageAndCommit(
-      addNewArtifact(repo, "middledeck/rug"),
-      "middledeck/rug",
+      addNewArtifact(repo, "lowerdeck/rug"),
+      "lowerdeck/rug",
       "Add rug",
     ).repo;
     repo = runOk(repo, "git checkout -b feature HEAD~1").repo;
@@ -456,7 +456,7 @@ describe("git merge", () => {
     const result = runOk(repo, "git merge feature");
     expect(result.output).toEqual(["Merge made by the 'ort' strategy."]);
     expect(headCommit(result.repo).parents).toHaveLength(2);
-    expect(result.repo.working["middledeck/rug"]).toBeDefined();
+    expect(result.repo.working["lowerdeck/rug"]).toBeDefined();
     expect(result.repo.working["upperdeck/bed"]?.color).toBe("#00ffff");
   });
 
@@ -464,28 +464,28 @@ describe("git merge", () => {
     let repo = createInitialRepository();
     repo = runOk(repo, "git checkout -b feature").repo;
     repo = stageAndCommit(
-      recolorArtifact(repo, "middledeck/sofa", "#111111"),
-      "middledeck/sofa",
+      recolorArtifact(repo, "lowerdeck/sofa", "#111111"),
+      "lowerdeck/sofa",
       "Feature sofa",
     ).repo;
     repo = runOk(repo, "git checkout main").repo;
     repo = stageAndCommit(
-      recolorArtifact(repo, "middledeck/sofa", "#222222"),
-      "middledeck/sofa",
+      recolorArtifact(repo, "lowerdeck/sofa", "#222222"),
+      "lowerdeck/sofa",
       "Main sofa",
     ).repo;
     const conflicted = runOk(repo, "git merge feature");
     const text = conflicted.output.join("\n");
-    expect(text).toContain("Auto-merging middledeck/sofa");
+    expect(text).toContain("Auto-merging lowerdeck/sofa");
     expect(text).toContain(
-      "CONFLICT (content): Merge conflict in middledeck/sofa",
+      "CONFLICT (content): Merge conflict in lowerdeck/sofa",
     );
     expect(text).toContain("Automatic merge failed");
     const status = runOk(conflicted.repo, "git status --short");
-    expect(status.output).toEqual(["UU middledeck/sofa"]);
-    const resolved = runOk(conflicted.repo, "git checkout --theirs middledeck/sofa");
+    expect(status.output).toEqual(["UU lowerdeck/sofa"]);
+    const resolved = runOk(conflicted.repo, "git checkout --theirs lowerdeck/sofa");
     expect(resolved.output).toEqual(["Updated 1 path from the index"]);
-    expect(resolved.repo.working["middledeck/sofa"]?.color).toBe("#111111");
+    expect(resolved.repo.working["lowerdeck/sofa"]?.color).toBe("#111111");
     const done = runOk(resolved.repo, 'git commit -m "Merge feature"');
     expect(done.repo.merge).toBeNull();
     expect(headCommit(done.repo).parents).toHaveLength(2);
@@ -495,21 +495,21 @@ describe("git merge", () => {
     let repo = createInitialRepository();
     repo = runOk(repo, "git checkout -b feature").repo;
     repo = stageAndCommit(
-      recolorArtifact(repo, "middledeck/sofa", "#111111"),
-      "middledeck/sofa",
+      recolorArtifact(repo, "lowerdeck/sofa", "#111111"),
+      "lowerdeck/sofa",
       "Feature sofa",
     ).repo;
     repo = runOk(repo, "git checkout main").repo;
     repo = stageAndCommit(
-      recolorArtifact(repo, "middledeck/sofa", "#222222"),
-      "middledeck/sofa",
+      recolorArtifact(repo, "lowerdeck/sofa", "#222222"),
+      "lowerdeck/sofa",
       "Main sofa",
     ).repo;
     const conflicted = run(repo, "git merge feature");
     expect(conflicted.repo.merge).not.toBeNull();
     const aborted = runOk(conflicted.repo, "git merge --abort");
     expect(aborted.repo.merge).toBeNull();
-    expect(aborted.repo.working["middledeck/sofa"]?.color).toBe("#222222");
+    expect(aborted.repo.working["lowerdeck/sofa"]?.color).toBe("#222222");
     const status = runOk(aborted.repo, "git status");
     expect(status.output.join("\n")).toContain(
       "nothing to commit, working tree clean",
@@ -522,14 +522,14 @@ describe("git rebase", () => {
     let repo = createInitialRepository();
     repo = runOk(repo, "git checkout -b feature").repo;
     repo = stageAndCommit(
-      recolorArtifact(repo, "middledeck/sofa", "#111111"),
-      "middledeck/sofa",
+      recolorArtifact(repo, "lowerdeck/sofa", "#111111"),
+      "lowerdeck/sofa",
       "Feature sofa",
     ).repo;
     repo = runOk(repo, "git checkout main").repo;
     repo = stageAndCommit(
-      addNewArtifact(repo, "middledeck/rug"),
-      "middledeck/rug",
+      addNewArtifact(repo, "lowerdeck/rug"),
+      "lowerdeck/rug",
       "Add rug",
     ).repo;
     repo = runOk(repo, "git checkout feature").repo;
@@ -537,49 +537,49 @@ describe("git rebase", () => {
     expect(result.output).toEqual([
       "Successfully rebased and updated refs/heads/feature.",
     ]);
-    expect(result.repo.working["middledeck/rug"]).toBeDefined();
-    expect(result.repo.working["middledeck/sofa"]?.color).toBe("#111111");
+    expect(result.repo.working["lowerdeck/rug"]).toBeDefined();
+    expect(result.repo.working["lowerdeck/sofa"]?.color).toBe("#111111");
   });
 
   it("stops on conflicts and finishes with --continue", () => {
     let repo = createInitialRepository();
     repo = runOk(repo, "git checkout -b feature").repo;
     repo = stageAndCommit(
-      recolorArtifact(repo, "middledeck/sofa", "#111111"),
-      "middledeck/sofa",
+      recolorArtifact(repo, "lowerdeck/sofa", "#111111"),
+      "lowerdeck/sofa",
       "Feature sofa",
     ).repo;
     repo = runOk(repo, "git checkout main").repo;
     repo = stageAndCommit(
-      recolorArtifact(repo, "middledeck/sofa", "#222222"),
-      "middledeck/sofa",
+      recolorArtifact(repo, "lowerdeck/sofa", "#222222"),
+      "lowerdeck/sofa",
       "Main sofa",
     ).repo;
     repo = runOk(repo, "git checkout feature").repo;
     const conflicted = run(repo, "git rebase main");
     expect(conflicted.output.join("\n")).toContain("could not apply");
     expect(conflicted.repo.rebase).not.toBeNull();
-    const resolved = runOk(conflicted.repo, "git checkout --theirs middledeck/sofa");
+    const resolved = runOk(conflicted.repo, "git checkout --theirs lowerdeck/sofa");
     const done = runOk(resolved.repo, "git rebase --continue");
     expect(done.output).toEqual([
       "Successfully rebased and updated refs/heads/feature.",
     ]);
     expect(done.repo.rebase).toBeNull();
-    expect(done.repo.working["middledeck/sofa"]?.color).toBe("#111111");
+    expect(done.repo.working["lowerdeck/sofa"]?.color).toBe("#111111");
   });
 
   it("aborts a conflicted rebase back to the snapshot", () => {
     let repo = createInitialRepository();
     repo = runOk(repo, "git checkout -b feature").repo;
     repo = stageAndCommit(
-      recolorArtifact(repo, "middledeck/sofa", "#111111"),
-      "middledeck/sofa",
+      recolorArtifact(repo, "lowerdeck/sofa", "#111111"),
+      "lowerdeck/sofa",
       "Feature sofa",
     ).repo;
     repo = runOk(repo, "git checkout main").repo;
     repo = stageAndCommit(
-      recolorArtifact(repo, "middledeck/sofa", "#222222"),
-      "middledeck/sofa",
+      recolorArtifact(repo, "lowerdeck/sofa", "#222222"),
+      "lowerdeck/sofa",
       "Main sofa",
     ).repo;
     repo = runOk(repo, "git checkout feature").repo;
@@ -587,7 +587,7 @@ describe("git rebase", () => {
     expect(conflicted.repo.rebase).not.toBeNull();
     const aborted = runOk(conflicted.repo, "git rebase --abort");
     expect(aborted.repo.rebase).toBeNull();
-    expect(aborted.repo.working["middledeck/sofa"]?.color).toBe("#111111");
+    expect(aborted.repo.working["lowerdeck/sofa"]?.color).toBe("#111111");
     const status = runOk(aborted.repo, "git status --short");
     expect(status.output).toEqual([]);
   });
@@ -596,23 +596,23 @@ describe("git rebase", () => {
     let repo = createInitialRepository();
     repo = runOk(repo, "git checkout -b feature").repo;
     repo = stageAndCommit(
-      addNewArtifact(repo, "middledeck/rug", "#abcdef"),
-      "middledeck/rug",
+      addNewArtifact(repo, "lowerdeck/rug", "#abcdef"),
+      "lowerdeck/rug",
       "Add colored rug",
     ).repo;
     repo = runOk(repo, "git checkout main").repo;
     repo = stageAndCommit(
-      moveArtifact(repo, "middledeck/table", [2, 3.4, 0]),
-      "middledeck/table",
+      moveArtifact(repo, "lowerdeck/table", [2, 0.4, 0]),
+      "lowerdeck/table",
       "Move table",
     ).repo;
     const result = runOk(repo, "git rebase --onto main HEAD~1 feature");
     expect(result.output).toEqual([
       "Successfully rebased and updated refs/heads/feature.",
     ]);
-    expect(result.repo.working["middledeck/rug"]?.color).toBe("#abcdef");
-    expect(result.repo.working["middledeck/table"]?.transform.position).toEqual([
-      2, 3.4, 0,
+    expect(result.repo.working["lowerdeck/rug"]?.color).toBe("#abcdef");
+    expect(result.repo.working["lowerdeck/table"]?.transform.position).toEqual([
+      2, 0.4, 0,
     ]);
   });
 });
@@ -638,8 +638,8 @@ describe("remote commands", () => {
     let repo = createInitialRepository();
     repo = runOk(repo, "git push").repo;
     repo = stageAndCommit(
-      recolorArtifact(repo, "middledeck/sofa", "#112233"),
-      "middledeck/sofa",
+      recolorArtifact(repo, "lowerdeck/sofa", "#112233"),
+      "lowerdeck/sofa",
       "Local one",
     ).repo;
     const result = runOk(repo, "git push");
@@ -654,8 +654,8 @@ describe("remote commands", () => {
     repo = runOk(repo, "git push").repo;
     repo = applyOriginUpdate(repo, colleagueDiverge(repo));
     repo = stageAndCommit(
-      recolorArtifact(repo, "middledeck/sofa", "#112233"),
-      "middledeck/sofa",
+      recolorArtifact(repo, "lowerdeck/sofa", "#112233"),
+      "lowerdeck/sofa",
       "Local one",
     ).repo;
     const result = run(repo, "git push");
@@ -670,8 +670,8 @@ describe("remote commands", () => {
     repo = runOk(repo, "git push").repo;
     repo = applyOriginUpdate(repo, colleagueDiverge(repo));
     repo = stageAndCommit(
-      recolorArtifact(repo, "middledeck/sofa", "#112233"),
-      "middledeck/sofa",
+      recolorArtifact(repo, "lowerdeck/sofa", "#112233"),
+      "lowerdeck/sofa",
       "Local one",
     ).repo;
     const stale = run(repo, "git push --force-with-lease");
@@ -689,8 +689,8 @@ describe("remote commands", () => {
     repo = runOk(repo, "git push").repo;
     repo = applyOriginUpdate(repo, colleagueDiverge(repo));
     repo = stageAndCommit(
-      recolorArtifact(repo, "middledeck/sofa", "#112233"),
-      "middledeck/sofa",
+      recolorArtifact(repo, "lowerdeck/sofa", "#112233"),
+      "lowerdeck/sofa",
       "Local one",
     ).repo;
     const result = runOk(repo, "git fetch");
@@ -727,8 +727,8 @@ describe("remote commands", () => {
     repo = runOk(repo, "git push").repo;
     repo = applyOriginUpdate(repo, colleagueDiverge(repo));
     repo = stageAndCommit(
-      recolorArtifact(repo, "middledeck/sofa", "#112233"),
-      "middledeck/sofa",
+      recolorArtifact(repo, "lowerdeck/sofa", "#112233"),
+      "lowerdeck/sofa",
       "Local one",
     ).repo;
     const result = runOk(repo, "git pull");
@@ -741,8 +741,8 @@ describe("remote commands", () => {
     repo = runOk(repo, "git push").repo;
     repo = applyOriginUpdate(repo, colleagueDiverge(repo));
     repo = stageAndCommit(
-      recolorArtifact(repo, "middledeck/sofa", "#112233"),
-      "middledeck/sofa",
+      recolorArtifact(repo, "lowerdeck/sofa", "#112233"),
+      "lowerdeck/sofa",
       "Local one",
     ).repo;
     repo = runOk(repo, "git config pull.rebase true").repo;
@@ -768,8 +768,8 @@ describe("git bundle, git clone, and git filter-repo", () => {
   it("creates a bundle into the execution env", () => {
     let repo = createInitialRepository();
     repo = stageAndCommit(
-      addNewArtifact(repo, "middledeck/rug"),
-      "middledeck/rug",
+      addNewArtifact(repo, "lowerdeck/rug"),
+      "lowerdeck/rug",
       "Add rug",
     ).repo;
     const env = emptyEnv();
@@ -795,7 +795,7 @@ describe("git bundle, git clone, and git filter-repo", () => {
 
   it("requires --force for filter-repo", () => {
     const repo = createInitialRepository();
-    const result = run(repo, "git filter-repo --invert-paths --path middledeck/rug");
+    const result = run(repo, "git filter-repo --invert-paths --path lowerdeck/rug");
     expect(result.error).toBe(true);
     expect(result.output.join("\n")).toContain(
       "refusing to rewrite history without --force",
@@ -805,22 +805,22 @@ describe("git bundle, git clone, and git filter-repo", () => {
   it("purges a path from history and clears remote tracking", () => {
     let repo = createInitialRepository();
     repo = stageAndCommit(
-      addNewArtifact(repo, "middledeck/rug"),
-      "middledeck/rug",
+      addNewArtifact(repo, "lowerdeck/rug"),
+      "lowerdeck/rug",
       "Add rug",
     ).repo;
     repo = stageAndCommit(
-      moveArtifact(repo, "middledeck/table", [2, 3.4, 0]),
-      "middledeck/table",
+      moveArtifact(repo, "lowerdeck/table", [2, 0.4, 0]),
+      "lowerdeck/table",
       "Move table",
     ).repo;
-    const result = runOk(repo, "git filter-repo --force --invert-paths --path middledeck/rug");
+    const result = runOk(repo, "git filter-repo --force --invert-paths --path lowerdeck/rug");
     expect(result.output.join("\n")).toMatch(
-      /Rewrote \d+ commits? to remove 'middledeck\/rug'\./,
+      /Rewrote \d+ commits? to remove 'lowerdeck\/rug'\./,
     );
-    expect(result.repo.working["middledeck/rug"]).toBeUndefined();
-    expect(result.repo.working["middledeck/table"]?.transform.position).toEqual([
-      2, 3.4, 0,
+    expect(result.repo.working["lowerdeck/rug"]).toBeUndefined();
+    expect(result.repo.working["lowerdeck/table"]?.transform.position).toEqual([
+      2, 0.4, 0,
     ]);
     expect(result.repo.remoteTracking).toEqual({});
   });
@@ -830,28 +830,28 @@ describe("git reset and error handling", () => {
   it("hard resets and reports the new HEAD", () => {
     let repo = createInitialRepository();
     repo = stageAndCommit(
-      recolorArtifact(repo, "middledeck/sofa", "#112233"),
-      "middledeck/sofa",
+      recolorArtifact(repo, "lowerdeck/sofa", "#112233"),
+      "lowerdeck/sofa",
       "Recolor sofa",
     ).repo;
     const result = runOk(repo, "git reset --hard HEAD~1");
     expect(result.output[0]).toMatch(
       /^HEAD is now at [0-9a-f]{7} Initial house$/,
     );
-    expect(result.repo.working["middledeck/sofa"]?.color).toBe("#7d9d6a");
+    expect(result.repo.working["lowerdeck/sofa"]?.color).toBe("#7d9d6a");
   });
 
   it("soft resets keep the working tree", () => {
     let repo = createInitialRepository();
     repo = stageAndCommit(
-      recolorArtifact(repo, "middledeck/sofa", "#112233"),
-      "middledeck/sofa",
+      recolorArtifact(repo, "lowerdeck/sofa", "#112233"),
+      "lowerdeck/sofa",
       "Recolor sofa",
     ).repo;
     const result = runOk(repo, "git reset --soft HEAD~1");
     expect(result.output).toEqual([]);
-    expect(result.repo.working["middledeck/sofa"]?.color).toBe("#112233");
-    expect(result.repo.index["middledeck/sofa"]?.color).toBe("#112233");
+    expect(result.repo.working["lowerdeck/sofa"]?.color).toBe("#112233");
+    expect(result.repo.index["lowerdeck/sofa"]?.color).toBe("#112233");
   });
 
   it("reinitializes with git init", () => {
@@ -873,7 +873,7 @@ describe("git reset and error handling", () => {
 
   it("rejects unknown flags with a usage line", () => {
     const repo = createInitialRepository();
-    const result = run(repo, "git rm --bogus middledeck/table");
+    const result = run(repo, "git rm --bogus lowerdeck/table");
     expect(result.error).toBe(true);
     expect(result.output[0]).toBe("error: unknown option `bogus'");
     expect(result.output[1]).toContain("usage: git rm");

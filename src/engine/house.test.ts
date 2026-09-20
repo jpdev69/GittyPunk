@@ -27,9 +27,7 @@ describe("initial house", () => {
   it("marks decks and the structural container as components", () => {
     for (const path of [
       "attic",
-      "roofdeck",
       "upperdeck",
-      "middledeck",
       "lowerdeck",
       "structural",
     ]) {
@@ -48,9 +46,9 @@ describe("makeArtifact", () => {
   });
 
   it("derives name and parent from the path", () => {
-    const artifact = makeArtifact("middledeck/rug");
+    const artifact = makeArtifact("lowerdeck/rug");
     expect(artifact.name).toBe("rug");
-    expect(artifact.parent).toBe("middledeck");
+    expect(artifact.parent).toBe("lowerdeck");
     expect(artifact.kind).toBe("artifact");
     expect(artifact.transform.position).toEqual([0, 0, 0]);
     expect(artifact.visible).toBe(true);
@@ -59,14 +57,14 @@ describe("makeArtifact", () => {
 
 describe("pathsUnderPrefix", () => {
   it("returns the path itself plus descendants", () => {
-    const paths = pathsUnderPrefix(buildInitialHouse(), "middledeck");
-    expect(paths).toContain("middledeck");
-    expect(paths).toContain("middledeck/table");
-    expect(paths).toContain("middledeck/tv");
+    const paths = pathsUnderPrefix(buildInitialHouse(), "lowerdeck");
+    expect(paths).toContain("lowerdeck");
+    expect(paths).toContain("lowerdeck/table");
+    expect(paths).toContain("lowerdeck/tv");
     expect(paths).not.toContain("upperdeck/bed");
   });
 
   it("returns nothing for unknown paths", () => {
-    expect(pathsUnderPrefix(buildInitialHouse(), "middledeck/ghost")).toEqual([]);
+    expect(pathsUnderPrefix(buildInitialHouse(), "lowerdeck/ghost")).toEqual([]);
   });
 });
