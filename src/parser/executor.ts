@@ -68,6 +68,36 @@ const COMMANDS: Record<string, CommandHandler> = {
   "filter-repo": filterRepoCommand,
 };
 
+const HELP_LINES: string[] = [
+  "GittyPunk Git Simulation Commands:",
+  "",
+  "  Worktree & Staging:",
+  "    git status                  Show house status",
+  "    git add <artifact>          Stage artifact changes to the blueprint",
+  "    git rm <artifact>           Remove artifact from house and blueprint",
+  "    git restore <artifact>      Discard working house changes",
+  "    git diff                    Show differences (working vs index/commit)",
+  "    git ls-files                List tracked house artifacts",
+  "",
+  "  History & Commits:",
+  "    git commit -m \"<msg>\"       Save snapshot of staged blueprint",
+  "    git log                     Show commit history",
+  "    git show [<rev>]            Inspect a commit",
+  "    git reset [--hard|--soft]   Reset house to a previous commit",
+  "",
+  "  Branches & Merges:",
+  "    git branch                  List or create branches",
+  "    git switch / git checkout   Switch branches or inspect commits",
+  "    git merge <branch>          Merge branch into current house",
+  "    git rebase <branch>         Rebase house commits onto branch",
+  "",
+  "  Remote Sync (origin):",
+  "    git fetch                   Fetch updates from simulated origin",
+  "    git pull                    Fetch and merge remote changes",
+  "    git push                    Push local commits to simulated origin",
+  "    git bundle / git clone      Save or restore house bundle",
+];
+
 export function executeCommand(
   input: string,
   repo: Repository,
@@ -78,7 +108,18 @@ export function executeCommand(
     if (tokens.length === 0) {
       return { repo, env, output: [], error: false };
     }
-    if (tokens[0] !== "git") {
+    const first = tokens[0] ?? "";
+    if (
+      first === "clear" ||
+      first === "cls" ||
+      (first === "git" && (tokens[1] === "clear" || tokens[1] === "cls"))
+    ) {
+      return { repo, env, output: ["__CLEAR__"], error: false };
+    }
+    if (first === "help") {
+      return { repo, env, output: HELP_LINES, error: false };
+    }
+    if (first !== "git") {
       return {
         repo,
         env,
@@ -87,12 +128,19 @@ export function executeCommand(
       };
     }
     const name = tokens[1];
-    if (!name) {
+    if (
+      !name ||
+      name === "help" ||
+      name === "--help" ||
+      name === "-h" ||
+      name === "--version" ||
+      name === "-v"
+    ) {
       return {
         repo,
         env,
-        output: ["usage: git <command> [...]"],
-        error: true,
+        output: HELP_LINES,
+        error: false,
       };
     }
     const handler = COMMANDS[name];

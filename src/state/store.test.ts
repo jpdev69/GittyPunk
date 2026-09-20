@@ -223,4 +223,22 @@ describe("app store", () => {
     useAppStore.getState().closeDiff();
     expect(useAppStore.getState().diffView).toBeNull();
   });
+
+  it("outputs help lines for git --help and usage for subcommand --help", () => {
+    useAppStore.getState().runCommand("git --help");
+    const lines = useAppStore.getState().lines;
+    expect(lines.some((l) => l.text.includes("GittyPunk Git Simulation Commands"))).toBe(true);
+
+    useAppStore.getState().runCommand("git status --help");
+    const statusLines = useAppStore.getState().lines;
+    expect(statusLines.some((l) => l.text.includes("usage: git status"))).toBe(true);
+  });
+
+  it("clears terminal lines for clear or cls", () => {
+    useAppStore.getState().runCommand("git status");
+    expect(useAppStore.getState().lines.length).toBeGreaterThan(0);
+
+    useAppStore.getState().runCommand("clear");
+    expect(useAppStore.getState().lines).toHaveLength(0);
+  });
 });

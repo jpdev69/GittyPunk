@@ -147,6 +147,10 @@ export const useAppStore = create<AppState>()((set, get) => ({
   runCommand: (input) => {
     const { repo, env, lines } = get();
     const result = executeCommand(input, repo, env);
+    if (result.output.length === 1 && result.output[0] === "__CLEAR__") {
+      set({ lines: [] });
+      return;
+    }
     const added: TerminalLine[] = [
       { kind: "input", text: input },
       ...result.output.map((text) => ({

@@ -67,6 +67,9 @@ export function unknownFlags(
   known: string[],
   usage: string,
 ): void {
+  if (parsed.flags.help === true || parsed.flags.h === true) {
+    throw new GitError(usage);
+  }
   for (const key of Object.keys(parsed.flags)) {
     if (!known.includes(key)) {
       throw new GitError(`error: unknown option \`${key}'\n${usage}`);
