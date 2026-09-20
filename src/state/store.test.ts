@@ -66,14 +66,33 @@ describe("app store", () => {
     expect(useAppStore.getState().focused).toBeNull();
   });
 
-  it("toggles the three view modes", () => {
+  it("toggles the four view modes", () => {
     expect(useAppStore.getState().viewMode).toBe("working");
     useAppStore.getState().setViewMode("blueprint");
     expect(useAppStore.getState().viewMode).toBe("blueprint");
     useAppStore.getState().setViewMode("snapshot");
     expect(useAppStore.getState().viewMode).toBe("snapshot");
+    useAppStore.getState().setViewMode("remote");
+    expect(useAppStore.getState().viewMode).toBe("remote");
     useAppStore.getState().setViewMode("working");
     expect(useAppStore.getState().viewMode).toBe("working");
+  });
+
+  it("flashes push, fetch, and pull feedback for remote sync commands", () => {
+    useAppStore.getState().runCommand("git push");
+    expect(useAppStore.getState().flash?.message).toBe(
+      "Remote house synced (pushed to origin)",
+    );
+
+    useAppStore.getState().runCommand("git fetch");
+    expect(useAppStore.getState().flash?.message).toBe(
+      "Fetched updates from origin",
+    );
+
+    useAppStore.getState().runCommand("git pull");
+    expect(useAppStore.getState().flash?.message).toBe(
+      "Pulled and merged from origin",
+    );
   });
 
   it("flashes stage feedback for staging commands", () => {

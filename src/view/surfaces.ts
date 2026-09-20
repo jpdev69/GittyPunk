@@ -26,6 +26,9 @@ const BLUEPRINT_TINT = "#5aa9ff";
 const BLUEPRINT_EDGES = "#8fc4ff";
 const SNAPSHOT_TINT = "#dfe7f3";
 const SNAPSHOT_EDGES = "#46536e";
+const REMOTE_TINT = "#38bdf8";
+const REMOTE_GLOW = "#0284c7";
+const REMOTE_EDGES = "#7dd3fc";
 const REMOVAL_TINT = "#ff6b6b";
 const REMOVAL_GLOW = "#ff3030";
 const THEIRS_EDGES = "#5b2430";
@@ -108,6 +111,16 @@ export function resolveSurface(
       shimmer: null,
       opacity: 1,
       edges: selected ? SELECTED_EDGES : SNAPSHOT_EDGES,
+      ghost,
+    };
+  } else if (mode === "remote") {
+    surface = {
+      color: lerpColor(item.color, REMOTE_TINT, 0.45),
+      emissive: REMOTE_GLOW,
+      intensity: 0.22,
+      shimmer: null,
+      opacity: 1,
+      edges: selected ? SELECTED_EDGES : REMOTE_EDGES,
       ghost,
     };
   } else {

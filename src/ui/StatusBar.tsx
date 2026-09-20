@@ -6,6 +6,7 @@ const VIEW_MODES: { mode: ViewMode; label: string }[] = [
   { mode: "working", label: "Working House" },
   { mode: "blueprint", label: "Staged Blueprint" },
   { mode: "snapshot", label: "Commit Snapshot" },
+  { mode: "remote", label: "Remote House" },
 ];
 
 export default function StatusBar() {
@@ -26,6 +27,11 @@ export default function StatusBar() {
       ) : null}
       {summary.behind > 0 ? (
         <span className="status-behind">↓{summary.behind}</span>
+      ) : null}
+      {summary.unfetched ? (
+        <span className="badge-rebase" title="Origin remote house has un-fetched updates">
+          UNFETCHED
+        </span>
       ) : null}
       {summary.merging ? <span className="badge-merge">MERGING</span> : null}
       {summary.rebasing ? (

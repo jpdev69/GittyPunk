@@ -45,6 +45,7 @@ export interface HouseSummary {
   merging: boolean;
   rebasing: boolean;
   clean: boolean;
+  unfetched: boolean;
 }
 
 export function summarizeHouseState(repo: Repository): HouseSummary {
@@ -61,6 +62,11 @@ export function summarizeHouseState(repo: Repository): HouseSummary {
   }
   const conflicts =
     repo.merge?.conflicts.length ?? repo.rebase?.conflicts.length ?? 0;
+  const branchName = status.branch ?? "main";
+  const originTip = repo.origin.branches[branchName];
+  const trackingTip = repo.remoteTracking[`origin/${branchName}`];
+  const unfetched = originTip !== undefined && originTip !== trackingTip;
+
   return {
     branch: status.branch,
     detached: status.detached,
@@ -75,6 +81,7 @@ export function summarizeHouseState(repo: Repository): HouseSummary {
     merging: status.merging,
     rebasing: status.rebasing,
     clean: status.clean && conflicts === 0,
+    unfetched,
   };
 }
 

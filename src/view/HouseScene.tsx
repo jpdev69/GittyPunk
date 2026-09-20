@@ -82,6 +82,46 @@ function Ground() {
   );
 }
 
+function SyncWave() {
+  const flash = useAppStore((state) => state.flash);
+  const ringRef = useRef<THREE.Mesh>(null);
+
+  useFrame(() => {
+    const mesh = ringRef.current;
+    if (!mesh || !flash) return;
+    const elapsed = (performance.now() - flash.at) / 1000;
+    if (elapsed < 0 || elapsed > 1.4) {
+      mesh.visible = false;
+      return;
+    }
+    mesh.visible = true;
+    const progress = elapsed / 1.4;
+    const scale = 3 + progress * 10;
+    mesh.scale.set(scale, scale, scale);
+    const material = mesh.material;
+    if (material instanceof THREE.MeshBasicMaterial) {
+      material.opacity = Math.max(0, (1 - progress) * 0.7);
+    }
+  });
+
+  return (
+    <mesh
+      ref={ringRef}
+      position={[0, -0.2, 0]}
+      rotation={[-Math.PI / 2, 0, 0]}
+      visible={false}
+    >
+      <ringGeometry args={[0.8, 1, 32]} />
+      <meshBasicMaterial
+        color="#38bdf8"
+        transparent
+        opacity={0.7}
+        side={THREE.DoubleSide}
+      />
+    </mesh>
+  );
+}
+
 function SelectionCard() {
   const selected = useAppStore((state) => state.selected);
   const repo = useAppStore((state) => state.repo);
@@ -165,6 +205,13 @@ function HintBar() {
       </p>
     );
   }
+  if (viewMode === "remote") {
+    return (
+      <p className="scene-hint">
+        Simulated Remote House (origin) - state on the remote repository
+      </p>
+    );
+  }
   if (viewMode === "snapshot") {
     return (
       <p className="scene-hint">Commit Snapshot - the house as last committed</p>
@@ -221,6 +268,7 @@ export default function HouseScene() {
         <SceneControls />
         {diffView ? <CompareView /> : <House />}
         <Ground />
+        <SyncWave />
       </Canvas>
       <SelectionCard />
       <HistoryPanel />

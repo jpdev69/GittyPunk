@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { headCommit } from "../engine";
+import { currentBranch, headCommit } from "../engine";
 import { useAppStore } from "../state/store";
 import type { ViewMode } from "../state/store";
 import { computeVisualStates } from "./artifact-states";
@@ -163,13 +163,21 @@ export default function House() {
         }
       }
     }
+    const originTip =
+      repo.origin.branches[currentBranch(repo) ?? "main"] ??
+      Object.values(repo.origin.branches)[0];
+    const originCommit = originTip ? repo.origin.commits[originTip] : undefined;
+    const remoteTree = originCommit ? originCommit.tree : repo.working;
+
     const tree = travel
       ? travel.tree
       : mode === "working"
         ? repo.working
         : mode === "blueprint"
           ? repo.index
-          : headCommit(repo).tree;
+          : mode === "remote"
+            ? remoteTree
+            : headCommit(repo).tree;
     return {
       items: buildRenderList(tree),
       states,

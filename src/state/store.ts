@@ -11,7 +11,7 @@ export interface TerminalLine {
 
 export const MAX_TERMINAL_LINES = 400;
 
-export type ViewMode = "working" | "blueprint" | "snapshot";
+export type ViewMode = "working" | "blueprint" | "snapshot" | "remote";
 
 export interface DiffView {
   from: string;
@@ -57,6 +57,41 @@ function nextFlash(input: string, result: CommandResult): Flash | null {
     return {
       kind: "conflict",
       message: "Conflicts - resolve the glowing artifacts",
+      at,
+    };
+  }
+  if (command.startsWith("git push")) {
+    return {
+      kind: "commit",
+      message: "Remote house synced (pushed to origin)",
+      at,
+    };
+  }
+  if (command.startsWith("git fetch")) {
+    return {
+      kind: "stage",
+      message: "Fetched updates from origin",
+      at,
+    };
+  }
+  if (command.startsWith("git pull")) {
+    return {
+      kind: "commit",
+      message: "Pulled and merged from origin",
+      at,
+    };
+  }
+  if (command.startsWith("git clone")) {
+    return {
+      kind: "reset",
+      message: "Cloned house from bundle",
+      at,
+    };
+  }
+  if (command.startsWith("git bundle")) {
+    return {
+      kind: "stage",
+      message: "House bundle created",
       at,
     };
   }
