@@ -4,12 +4,20 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { headCommit } from "../engine";
+import ComparePanel from "../ui/ComparePanel";
+import HistoryPanel from "../ui/HistoryPanel";
 import { useAppStore } from "../state/store";
+import CompareView from "./compare";
 import House from "./House";
 
 const HOUSE_BOX = new THREE.Box3(
   new THREE.Vector3(-5, -0.4, -5),
   new THREE.Vector3(5, 15.2, 5),
+);
+
+const COMPARE_BOX = new THREE.Box3(
+  new THREE.Vector3(-13.5, -0.4, -5),
+  new THREE.Vector3(13.5, 15.2, 5),
 );
 
 function deckFocusBox(path: string): THREE.Box3 | null {
@@ -25,6 +33,7 @@ function deckFocusBox(path: string): THREE.Box3 | null {
 
 function SceneControls() {
   const focused = useAppStore((state) => state.focused);
+  const diffView = useAppStore((state) => state.diffView);
   const controlsRef = useRef<CameraControlsImpl | null>(null);
   const lastInteractionRef = useRef(0);
 
@@ -37,11 +46,13 @@ function SceneControls() {
     const controls = controlsRef.current;
     lastInteractionRef.current = performance.now();
     if (!controls) return;
-    const box = focused
-      ? deckFocusBox(focused) ?? HOUSE_BOX
-      : HOUSE_BOX;
+    const box = diffView
+      ? COMPARE_BOX
+      : focused
+        ? deckFocusBox(focused) ?? HOUSE_BOX
+        : HOUSE_BOX;
     void controls.fitToBox(box, true);
-  }, [focused]);
+  }, [focused, diffView]);
 
   const markInteraction = () => {
     lastInteractionRef.current = performance.now();
@@ -106,10 +117,47 @@ function SelectionCard() {
   );
 }
 
+function TravelBanner() {
+  const travelCommit = useAppStore((state) => state.travelCommit);
+  const repo = useAppStore((state) => state.repo);
+  const setTravelCommit = useAppStore((state) => state.setTravelCommit);
+  if (!travelCommit) return null;
+  const commit = repo.commits[travelCommit] ?? null;
+  return (
+    <div className="travel-banner">
+      <span>
+        Viewing snapshot {travelCommit.slice(0, 7)}
+        {commit ? ` - ${commit.message}` : ""}
+      </span>
+      <button type="button" onClick={() => setTravelCommit(null)}>
+        Return to working house
+      </button>
+    </div>
+  );
+}
+
 function HintBar() {
   const focused = useAppStore((state) => state.focused);
   const viewMode = useAppStore((state) => state.viewMode);
-  if (focused) return <p className="scene-hint">Click empty space to zoom back out</p>;
+  const diffView = useAppStore((state) => state.diffView);
+  const travelCommit = useAppStore((state) => state.travelCommit);
+  if (diffView) {
+    return (
+      <p className="scene-hint">
+        Side-by-side compare - changed artifacts glow blue, arrows show moves
+      </p>
+    );
+  }
+  if (travelCommit) {
+    return (
+      <p className="scene-hint">
+        Detached snapshot view - the working house is untouched
+      </p>
+    );
+  }
+  if (focused) {
+    return <p className="scene-hint">Click empty space to zoom back out</p>;
+  }
   if (viewMode === "blueprint") {
     return (
       <p className="scene-hint">
@@ -140,6 +188,7 @@ function FlashOverlay() {
 }
 
 export default function HouseScene() {
+  const diffView = useAppStore((state) => state.diffView);
   return (
     <div className="scene-wrap">
       <Canvas
@@ -170,10 +219,13 @@ export default function HouseScene() {
           shadow-bias={-0.0004}
         />
         <SceneControls />
-        <House />
+        {diffView ? <CompareView /> : <House />}
         <Ground />
       </Canvas>
       <SelectionCard />
+      <HistoryPanel />
+      <ComparePanel />
+      <TravelBanner />
       <FlashOverlay />
       <HintBar />
     </div>

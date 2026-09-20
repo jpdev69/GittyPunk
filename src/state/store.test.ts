@@ -13,6 +13,8 @@ function resetStore() {
     focused: null,
     viewMode: "working",
     flash: null,
+    travelCommit: null,
+    diffView: null,
   });
 }
 
@@ -130,5 +132,76 @@ describe("app store", () => {
     expect(
       lines.some((line) => line.text.includes("CONFLICT (content)")),
     ).toBe(true);
+  });
+
+  it("tracks time travel to a commit snapshot", () => {
+    useAppStore.getState().runCommand("git rm table");
+    useAppStore.getState().runCommand('git commit -m "Remove table"');
+    const history = useAppStore.getState().repo.commits;
+    const firstCommit = Object.values(history).find(
+      (commit) => commit.message === "Initial house",
+    );
+
+    useAppStore.getState().setTravelCommit(firstCommit?.id ?? "");
+    expect(useAppStore.getState().travelCommit).toBe(firstCommit?.id ?? "");
+
+    useAppStore.getState().runCommand("git frobnicate");
+    expect(useAppStore.getState().travelCommit).toBe(firstCommit?.id ?? "");
+
+    useAppStore.getState().runCommand("git status");
+    expect(useAppStore.getState().travelCommit).toBeNull();
+
+    useAppStore.getState().setTravelCommit(firstCommit?.id ?? "");
+    useAppStore.getState().setViewMode("snapshot");
+    expect(useAppStore.getState().travelCommit).toBeNull();
+
+    useAppStore.getState().setTravelCommit(firstCommit?.id ?? "");
+    useAppStore.getState().setTravelCommit(null);
+    expect(useAppStore.getState().travelCommit).toBeNull();
+  });
+
+  it("opens the compare view for git diff forms", () => {
+    useAppStore.getState().runCommand("git rm table");
+    useAppStore.getState().runCommand('git commit -m "Remove table"');
+
+    useAppStore.getState().runCommand("git diff");
+    expect(useAppStore.getState().diffView).toEqual({
+      from: "index",
+      to: "working",
+    });
+
+    useAppStore.getState().runCommand("git diff --cached");
+    expect(useAppStore.getState().diffView).toEqual({
+      from: "HEAD",
+      to: "index",
+    });
+
+    useAppStore.getState().runCommand("git diff HEAD~1 HEAD");
+    expect(useAppStore.getState().diffView).toEqual({
+      from: "HEAD~1",
+      to: "HEAD",
+    });
+
+    useAppStore.getState().runCommand("git diff main");
+    expect(useAppStore.getState().diffView).toEqual({
+      from: "main",
+      to: "working",
+    });
+  });
+
+  it("keeps the compare view on failed commands and closes it on new context", () => {
+    useAppStore.getState().runCommand("git diff");
+    const open = useAppStore.getState().diffView;
+    expect(open).toEqual({ from: "index", to: "working" });
+
+    useAppStore.getState().runCommand("git diff bogus-rev");
+    expect(useAppStore.getState().diffView).toEqual(open);
+
+    useAppStore.getState().runCommand("git status");
+    expect(useAppStore.getState().diffView).toBeNull();
+
+    useAppStore.getState().runCommand("git diff");
+    useAppStore.getState().closeDiff();
+    expect(useAppStore.getState().diffView).toBeNull();
   });
 });

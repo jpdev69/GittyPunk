@@ -286,3 +286,60 @@ export function DeletionMarker() {
     </group>
   );
 }
+
+interface OutlineSpec {
+  size: Vec3Tuple;
+  offset: Vec3Tuple;
+}
+
+const OUTLINES: Partial<Record<GeometryKind, OutlineSpec>> = {
+  deck: { size: [5, 0.4, 5], offset: [0, 0.2, 0] },
+  attic: { size: [4.6, 0.4, 4.6], offset: [0, 0.2, 0] },
+  roof: { size: [6, 1.8, 6], offset: [0, 0.9, 0] },
+  stairs: { size: [1, 3, 2.4], offset: [0, 0.1, 0] },
+  windows: { size: [3.9, 1.2, 0.3], offset: [0, 0, -1.15] },
+  table: { size: [1.4, 0.78, 0.9], offset: [0, 0.39, 0] },
+  chair: { size: [0.55, 0.8, 0.55], offset: [0, 0.4, 0] },
+  sofa: { size: [1.6, 0.85, 0.8], offset: [0, 0.42, 0] },
+  bed: { size: [1.15, 0.9, 2.05], offset: [0, 0.45, 0] },
+  lamp: { size: [0.6, 1.35, 0.6], offset: [0, 0.68, 0] },
+  tv: { size: [1.2, 0.8, 0.4], offset: [0, 0.4, 0] },
+  toilet: { size: [0.7, 0.8, 0.7], offset: [0, 0.4, 0.1] },
+  sink: { size: [0.75, 0.95, 0.55], offset: [0, 0.48, 0] },
+  bathtub: { size: [1.7, 0.65, 0.95], offset: [0, 0.33, 0] },
+  box: { size: [0.85, 0.65, 0.85], offset: [0, 0.33, 0] },
+  plant: { size: [0.68, 1.1, 0.68], offset: [0, 0.55, 0] },
+  rug: { size: [1.7, 0.1, 1.15], offset: [0, 0.05, 0] },
+  crate: { size: [0.9, 0.9, 0.9], offset: [0, 0.45, 0] },
+};
+
+export function OutlineGhost({
+  kind,
+  color,
+  position,
+}: {
+  kind: GeometryKind;
+  color: string;
+  position: Vec3Tuple;
+}) {
+  const spec = OUTLINES[kind];
+  if (!spec) return null;
+  return (
+    <mesh
+      position={[
+        position[0] + spec.offset[0],
+        position[1] + spec.offset[1],
+        position[2] + spec.offset[2],
+      ]}
+    >
+      <boxGeometry args={spec.size} />
+      <meshBasicMaterial
+        color={color}
+        transparent
+        opacity={0.04}
+        depthWrite={false}
+      />
+      <Edges threshold={20} color={color} />
+    </mesh>
+  );
+}

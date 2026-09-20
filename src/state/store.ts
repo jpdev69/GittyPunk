@@ -13,10 +13,33 @@ export const MAX_TERMINAL_LINES = 400;
 
 export type ViewMode = "working" | "blueprint" | "snapshot";
 
+export interface DiffView {
+  from: string;
+  to: string;
+}
+
 export interface Flash {
   kind: "stage" | "commit" | "reset" | "conflict" | "error";
   message: string;
   at: number;
+}
+
+function diffTargetFor(command: string): DiffView | null {
+  if (!/^git diff($|\s)/.test(command)) return null;
+  const tokens = command.split(/\s+/).slice(2);
+  const cached = tokens.includes("--cached") || tokens.includes("--staged");
+  const positionals = tokens.filter((token) => !token.startsWith("-"));
+  if (positionals.length >= 2) {
+    return { from: positionals[0] ?? "", to: positionals[1] ?? "" };
+  }
+  if (positionals.length === 1) {
+    return cached
+      ? { from: positionals[0] ?? "", to: "index" }
+      : { from: positionals[0] ?? "", to: "working" };
+  }
+  return cached
+    ? { from: "HEAD", to: "index" }
+    : { from: "index", to: "working" };
 }
 
 function nextFlash(input: string, result: CommandResult): Flash | null {
@@ -61,10 +84,14 @@ export interface AppState {
   focused: string | null;
   viewMode: ViewMode;
   flash: Flash | null;
+  travelCommit: string | null;
+  diffView: DiffView | null;
   runCommand: (input: string) => void;
   select: (path: string | null) => void;
   focusDeck: (path: string | null) => void;
   setViewMode: (mode: ViewMode) => void;
+  setTravelCommit: (id: string | null) => void;
+  closeDiff: () => void;
 }
 
 export const useAppStore = create<AppState>()((set, get) => ({
@@ -80,6 +107,8 @@ export const useAppStore = create<AppState>()((set, get) => ({
   focused: null,
   viewMode: "working",
   flash: null,
+  travelCommit: null,
+  diffView: null,
   runCommand: (input) => {
     const { repo, env, lines } = get();
     const result = executeCommand(input, repo, env);
@@ -95,9 +124,13 @@ export const useAppStore = create<AppState>()((set, get) => ({
       env: result.env,
       lines: [...lines, ...added].slice(-MAX_TERMINAL_LINES),
       flash: nextFlash(input, result),
+      travelCommit: result.error ? get().travelCommit : null,
+      diffView: result.error ? get().diffView : diffTargetFor(input.trim()),
     });
   },
   select: (path) => set({ selected: path }),
   focusDeck: (path) => set({ focused: path }),
-  setViewMode: (mode) => set({ viewMode: mode }),
+  setViewMode: (mode) => set({ viewMode: mode, travelCommit: null }),
+  setTravelCommit: (id) => set({ travelCommit: id }),
+  closeDiff: () => set({ diffView: null }),
 }));
