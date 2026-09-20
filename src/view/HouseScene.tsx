@@ -9,6 +9,7 @@ import HistoryPanel from "../ui/HistoryPanel";
 import { useAppStore } from "../state/store";
 import CompareView from "./compare";
 import House from "./House";
+import RemoteSideBySideView from "./RemoteView";
 
 const HOUSE_BOX = new THREE.Box3(
   new THREE.Vector3(-5, -0.4, -5),
@@ -34,6 +35,7 @@ function deckFocusBox(path: string): THREE.Box3 | null {
 function SceneControls() {
   const focused = useAppStore((state) => state.focused);
   const diffView = useAppStore((state) => state.diffView);
+  const viewMode = useAppStore((state) => state.viewMode);
   const controlsRef = useRef<CameraControlsImpl | null>(null);
   const lastInteractionRef = useRef(0);
 
@@ -46,13 +48,13 @@ function SceneControls() {
     const controls = controlsRef.current;
     lastInteractionRef.current = performance.now();
     if (!controls) return;
-    const box = diffView
+    const box = (diffView || viewMode === "remote")
       ? COMPARE_BOX
       : focused
         ? deckFocusBox(focused) ?? HOUSE_BOX
         : HOUSE_BOX;
     void controls.fitToBox(box, true);
-  }, [focused, diffView]);
+  }, [focused, diffView, viewMode]);
 
   const markInteraction = () => {
     lastInteractionRef.current = performance.now();
@@ -176,6 +178,18 @@ function TravelBanner() {
   );
 }
 
+function RemoteBanner() {
+  const viewMode = useAppStore((state) => state.viewMode);
+  if (viewMode !== "remote") return null;
+  return (
+    <div className="remote-banner">
+      <span className="remote-label-local">Local House</span>
+      <span className="remote-label-vs">VS</span>
+      <span className="remote-label-origin">Remote House (origin)</span>
+    </div>
+  );
+}
+
 function HintBar() {
   const focused = useAppStore((state) => state.focused);
   const viewMode = useAppStore((state) => state.viewMode);
@@ -236,6 +250,7 @@ function FlashOverlay() {
 
 export default function HouseScene() {
   const diffView = useAppStore((state) => state.diffView);
+  const viewMode = useAppStore((state) => state.viewMode);
   return (
     <div className="scene-wrap">
       <Canvas
@@ -266,7 +281,13 @@ export default function HouseScene() {
           shadow-bias={-0.0004}
         />
         <SceneControls />
-        {diffView ? <CompareView /> : <House />}
+        {diffView ? (
+          <CompareView />
+        ) : viewMode === "remote" ? (
+          <RemoteSideBySideView />
+        ) : (
+          <House />
+        )}
         <Ground />
         <SyncWave />
       </Canvas>
@@ -274,6 +295,7 @@ export default function HouseScene() {
       <HistoryPanel />
       <ComparePanel />
       <TravelBanner />
+      <RemoteBanner />
       <FlashOverlay />
       <HintBar />
     </div>
