@@ -3,7 +3,7 @@ import type { CameraControlsImpl } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
-import { headCommit } from "../engine";
+import { currentBranch, headCommit } from "../engine";
 import ComparePanel from "../ui/ComparePanel";
 import HistoryPanel from "../ui/HistoryPanel";
 import { useAppStore } from "../state/store";
@@ -127,10 +127,16 @@ function SyncWave() {
 function SelectionCard() {
   const selected = useAppStore((state) => state.selected);
   const repo = useAppStore((state) => state.repo);
+  const branch = currentBranch(repo) ?? "main";
+  const originTip =
+    repo.origin.branches[branch] ?? Object.values(repo.origin.branches)[0];
+  const originCommit = originTip ? repo.origin.commits[originTip] : undefined;
+
   const artifact = selected
     ? repo.working[selected] ??
       repo.index[selected] ??
-      headCommit(repo).tree[selected]
+      headCommit(repo).tree[selected] ??
+      originCommit?.tree[selected]
     : undefined;
   if (!selected || !artifact) return null;
   return (

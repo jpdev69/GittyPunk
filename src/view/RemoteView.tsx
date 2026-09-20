@@ -9,6 +9,7 @@ import { resolveSurface } from "./surfaces";
 export default function RemoteSideBySideView() {
   const repo = useAppStore((state) => state.repo);
   const selected = useAppStore((state) => state.selected);
+  const select = useAppStore((state) => state.select);
 
   const { localItems, remoteItems } = useMemo(() => {
     const branch = currentBranch(repo) ?? "main";
@@ -27,46 +28,74 @@ export default function RemoteSideBySideView() {
     <group>
       {/* Left: Local House */}
       <group position={[-COMPARE_SIDE_OFFSET, 0, 0]}>
-        {localItems.map((item) => (
-          <group
-            key={item.path}
-            position={item.position}
-            rotation={item.rotation}
-            scale={item.scale}
-          >
-            <ArtifactGeometry
-              kind={item.geometry}
-              surface={resolveSurface(
-                item,
-                undefined,
-                selected === item.path,
-                "working",
-              )}
-            />
-          </group>
-        ))}
+        {localItems.map((item) => {
+          if (item.geometry === "container") return null;
+          return (
+            <group
+              key={item.path}
+              position={item.position}
+              rotation={item.rotation}
+              scale={item.scale}
+              onClick={(event) => {
+                event.stopPropagation();
+                select(item.path);
+              }}
+              onPointerOver={(event) => {
+                event.stopPropagation();
+                document.body.style.cursor = "pointer";
+              }}
+              onPointerOut={() => {
+                document.body.style.cursor = "auto";
+              }}
+            >
+              <ArtifactGeometry
+                kind={item.geometry}
+                surface={resolveSurface(
+                  item,
+                  undefined,
+                  selected === item.path,
+                  "working",
+                )}
+              />
+            </group>
+          );
+        })}
       </group>
 
       {/* Right: Remote House (origin) */}
       <group position={[COMPARE_SIDE_OFFSET, 0, 0]}>
-        {remoteItems.map((item) => (
-          <group
-            key={item.path}
-            position={item.position}
-            rotation={item.rotation}
-            scale={item.scale}
-          >
-            <ArtifactGeometry
-              kind={item.geometry}
-              surface={resolveSurface(
-                item,
-                undefined,
-                selected === item.path,
-                "remote",
-              )}
-            />
-          </group>
-        ))}
+        {remoteItems.map((item) => {
+          if (item.geometry === "container") return null;
+          return (
+            <group
+              key={item.path}
+              position={item.position}
+              rotation={item.rotation}
+              scale={item.scale}
+              onClick={(event) => {
+                event.stopPropagation();
+                select(item.path);
+              }}
+              onPointerOver={(event) => {
+                event.stopPropagation();
+                document.body.style.cursor = "pointer";
+              }}
+              onPointerOut={() => {
+                document.body.style.cursor = "auto";
+              }}
+            >
+              <ArtifactGeometry
+                kind={item.geometry}
+                surface={resolveSurface(
+                  item,
+                  undefined,
+                  selected === item.path,
+                  "remote",
+                )}
+              />
+            </group>
+          );
+        })}
       </group>
     </group>
   );

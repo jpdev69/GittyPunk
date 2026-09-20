@@ -8,7 +8,7 @@ import type { CompareChange } from "./compare-model";
 import { ArtifactGeometry, OutlineGhost } from "./geometry";
 import { buildRenderList, toRenderItem } from "./render-model";
 import type { RenderItem } from "./render-model";
-import { resolveSurface } from "./surfaces";
+import { resolveSurface, SELECTED_EDGES } from "./surfaces";
 import type { PieceSurface } from "./surfaces";
 
 export const COMPARE_SIDE_OFFSET = 8;
@@ -18,15 +18,19 @@ const CHANGED_EDGES = "#9fd3ff";
 const ADDED_OUTLINE = "#7ee787";
 const REMOVED_OUTLINE = "#ff7b72";
 
-function compareSurface(item: RenderItem, changed: boolean): PieceSurface {
-  const base = resolveSurface(item, undefined, false, "snapshot");
+function compareSurface(
+  item: RenderItem,
+  changed: boolean,
+  selected: boolean,
+): PieceSurface {
+  const base = resolveSurface(item, undefined, selected, "snapshot");
   if (!changed) return base;
   return {
     ...base,
     color: item.color,
     emissive: CHANGED_GLOW,
     intensity: 0.35,
-    edges: CHANGED_EDGES,
+    edges: selected ? SELECTED_EDGES : CHANGED_EDGES,
   };
 }
 
@@ -51,10 +55,13 @@ function CompareSide({
   changes: Record<string, CompareChange>;
   side: "from" | "to";
 }) {
+  const select = useAppStore((state) => state.select);
+  const selected = useAppStore((state) => state.selected);
   const items = useMemo(() => buildRenderList(tree), [tree]);
   return (
     <group>
       {items.map((item) => {
+        if (item.geometry === "container") return null;
         const change = changes[item.path];
         const before = side === "to" && change?.moved ? change.before : null;
         const beforeOffset = before
@@ -70,10 +77,25 @@ function CompareSide({
             position={item.position}
             rotation={item.rotation}
             scale={item.scale}
+            onClick={(event) => {
+              event.stopPropagation();
+              select(item.path);
+            }}
+            onPointerOver={(event) => {
+              event.stopPropagation();
+              document.body.style.cursor = "pointer";
+            }}
+            onPointerOut={() => {
+              document.body.style.cursor = "auto";
+            }}
           >
             <ArtifactGeometry
               kind={item.geometry}
-              surface={compareSurface(item, change !== undefined)}
+              surface={compareSurface(
+                item,
+                change !== undefined,
+                selected === item.path,
+              )}
             />
             {before && beforeOffset ? (
               <group position={beforeOffset}>
