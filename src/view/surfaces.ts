@@ -27,7 +27,6 @@ const BLUEPRINT_EDGES = "#8fc4ff";
 const SNAPSHOT_TINT = "#dfe7f3";
 const SNAPSHOT_EDGES = "#46536e";
 const REMOTE_TINT = "#38bdf8";
-const REMOTE_GLOW = "#0284c7";
 const REMOTE_EDGES = "#7dd3fc";
 const REMOVAL_TINT = "#ff6b6b";
 const REMOVAL_GLOW = "#ff3030";
@@ -94,11 +93,12 @@ export function resolveSurface(
   let surface: PieceSurface;
 
   if (mode === "blueprint") {
+    const isStaged = Boolean(state && state.staged && state.staged !== "removed");
     surface = {
       color: lerpColor(item.color, BLUEPRINT_TINT, 0.55),
-      emissive: STAGED_GLOW,
-      intensity: 0.12,
-      shimmer: null,
+      emissive: isStaged ? STAGED_GLOW : "#000000",
+      intensity: isStaged ? 0.28 : 0,
+      shimmer: isStaged ? "blueprint" : null,
       opacity: 1,
       edges: selected ? SELECTED_EDGES : BLUEPRINT_EDGES,
       ghost,
@@ -114,11 +114,12 @@ export function resolveSurface(
       ghost,
     };
   } else if (mode === "remote") {
+    const isConflict = Boolean(state?.conflict);
     surface = {
       color: lerpColor(item.color, REMOTE_TINT, 0.45),
-      emissive: REMOTE_GLOW,
-      intensity: 0.22,
-      shimmer: null,
+      emissive: isConflict ? CONFLICT_GLOW : "#000000",
+      intensity: isConflict ? 0.3 : 0,
+      shimmer: isConflict ? "conflict" : null,
       opacity: 1,
       edges: selected ? SELECTED_EDGES : REMOTE_EDGES,
       ghost,
