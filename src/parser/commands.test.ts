@@ -849,6 +849,20 @@ describe("git bundle, git clone, and git filter-repo", () => {
     const checkedOut = runOk(repo, "git checkout -- lowerdeck/sofa").repo;
     expect(checkedOut.working["lowerdeck/sofa"]).toBeDefined();
   });
+
+  it("allows restoring an artifact deleted in past commits from an older commit source", () => {
+    let repo = createInitialRepository();
+    repo = runOk(repo, "git rm lowerdeck/chair").repo;
+    repo = runOk(repo, 'git commit -m "Removed chair"').repo;
+    repo = runOk(repo, "git checkout -b new").repo;
+
+    const failedAdd = run(repo, "git add lowerdeck/chair");
+    expect(failedAdd.error).toBe(true);
+    expect(failedAdd.output.join("\n")).toContain("did not match any files");
+
+    repo = runOk(repo, "git restore -s HEAD~1 lowerdeck/chair").repo;
+    expect(repo.working["lowerdeck/chair"]).toBeDefined();
+  });
 });
 
 describe("git reset and error handling", () => {

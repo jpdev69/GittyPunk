@@ -8,6 +8,16 @@ export function knownPaths(repo: Repository): Set<string> {
       paths.add(path);
     }
   }
+  for (const commitObj of Object.values(repo.commits)) {
+    for (const path of Object.keys(commitObj.tree)) {
+      paths.add(path);
+    }
+  }
+  for (const commitObj of Object.values(repo.origin.commits)) {
+    for (const path of Object.keys(commitObj.tree)) {
+      paths.add(path);
+    }
+  }
   return paths;
 }
 
