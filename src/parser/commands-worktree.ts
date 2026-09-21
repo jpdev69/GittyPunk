@@ -1,5 +1,6 @@
 import {
   GitError,
+  cloneRepo,
   diffRefs,
   getStatus,
   headCommit,
@@ -8,6 +9,7 @@ import {
   restoreWorking,
   stage,
   stageAll,
+  treeOf,
   unstage,
 } from "../engine";
 import type { DiffEntry } from "../engine";
@@ -177,16 +179,51 @@ export const rmCommand: CommandHandler = ({ repo, args }) => {
 const RESTORE_USAGE = "usage: git restore [--staged] <pathspec>...";
 
 export const restoreCommand: CommandHandler = ({ repo, args }) => {
-  const parsed = parseArgs(args);
-  unknownFlags(parsed, ["staged", "S", "worktree", "W"], RESTORE_USAGE);
+  const parsed = parseArgs(args, new Set(["source", "s"]));
+  unknownFlags(
+    parsed,
+    ["staged", "S", "worktree", "W", "source", "s"],
+    RESTORE_USAGE,
+  );
   const staged = parsed.flags.staged === true || parsed.flags.S === true;
+  const worktree = parsed.flags.worktree === true || parsed.flags.W === true;
+  const sourceOpt =
+    typeof parsed.flags.source === "string"
+      ? parsed.flags.source
+      : typeof parsed.flags.s === "string"
+        ? parsed.flags.s
+        : undefined;
+
   if (parsed.positionals.length === 0) {
     throw new GitError("fatal: you must specify path(s) to restore");
   }
+
   let next = repo;
   for (const spec of parsed.positionals) {
     for (const path of expandPathspecs(repo, spec)) {
-      next = staged ? unstage(next, path) : restoreWorking(next, path);
+      if (sourceOpt !== undefined) {
+        const sourceTree = treeOf(repo, sourceOpt);
+        const artifact = sourceTree[path];
+        if (!artifact) {
+          throw new GitError(
+            `error: pathspec '${path}' did not match any file known to git`,
+          );
+        }
+        next = cloneRepo(next);
+        if (staged) {
+          next.index[path] = structuredClone(artifact);
+        }
+        if (worktree || !staged) {
+          next.working[path] = structuredClone(artifact);
+        }
+      } else {
+        if (staged) {
+          next = unstage(next, path);
+        }
+        if (worktree || !staged) {
+          next = restoreWorking(next, path);
+        }
+      }
     }
   }
   return { repo: next, output: [] };

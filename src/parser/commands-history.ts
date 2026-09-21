@@ -3,6 +3,7 @@ import {
   abortMerge,
   abortRebase,
   checkout,
+  cloneRepo,
   commit,
   createBranch,
   currentBranch,
@@ -21,6 +22,7 @@ import {
   setConfig,
   showCommit,
   stage,
+  treeOf,
 } from "../engine";
 import type {
   CommitOptions,
@@ -340,6 +342,30 @@ export const checkoutCommand: CommandHandler = ({ repo, args }) => {
     };
   }
 
+  if (parsed.trailing.length > 0) {
+    const rev = parsed.positionals[0] ?? "HEAD";
+    const sourceTree = treeOf(repo, rev);
+    let next = repo;
+    let count = 0;
+    for (const spec of parsed.trailing) {
+      for (const path of expandPathspecs(repo, spec)) {
+        const artifact = sourceTree[path];
+        if (artifact) {
+          next = cloneRepo(next);
+          next.working[path] = structuredClone(artifact);
+          next.index[path] = structuredClone(artifact);
+          count += 1;
+        }
+      }
+    }
+    return {
+      repo: next,
+      output: [
+        `Updated ${count} ${count === 1 ? "path" : "paths"} from ${rev === "HEAD" ? "the index" : rev}`,
+      ],
+    };
+  }
+
   const createName =
     typeof parsed.flags.b === "string"
       ? parsed.flags.b
@@ -353,6 +379,34 @@ export const checkoutCommand: CommandHandler = ({ repo, args }) => {
   const target = parsed.positionals[0];
   if (!target) {
     throw new GitError(`error: a branch or commit is required\n${CHECKOUT_USAGE}`);
+  }
+  if (!repo.branches[target] && !repo.commits[target]) {
+    let matchedPaths: string[] = [];
+    try {
+      matchedPaths = expandPathspecs(repo, target);
+    } catch {
+      // Not a path
+    }
+    if (matchedPaths.length > 0) {
+      const headTree = headCommit(repo).tree;
+      let next = repo;
+      let count = 0;
+      for (const path of matchedPaths) {
+        const artifact = headTree[path];
+        if (artifact) {
+          next = cloneRepo(next);
+          next.working[path] = structuredClone(artifact);
+          next.index[path] = structuredClone(artifact);
+          count += 1;
+        }
+      }
+      return {
+        repo: next,
+        output: [
+          `Updated ${count} ${count === 1 ? "path" : "paths"} from the index`,
+        ],
+      };
+    }
   }
   if (repo.branches[target] && currentBranch(repo) === target) {
     return { output: [`Already on '${target}'`] };

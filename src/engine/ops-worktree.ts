@@ -31,7 +31,15 @@ export function restoreWorking(repo: Repository, path: string): Repository {
   const next = cloneRepo(repo);
   const paths = pathsUnderPrefix(next.index, path);
   if (paths.length === 0) {
-    throw new GitError(`error: pathspec '${path}' did not match any file known to git`);
+    const headTree = headCommit(next).tree;
+    if (headTree[path] || pathsUnderPrefix(headTree, path).length > 0) {
+      throw new GitError(
+        `error: pathspec '${path}' did not match any file known to git\nhint: '${path}' is staged for deletion. Use 'git restore --staged ${path}' or 'git restore -s HEAD ${path}'.`,
+      );
+    }
+    throw new GitError(
+      `error: pathspec '${path}' did not match any file known to git`,
+    );
   }
   for (const target of paths) {
     next.working[target] = structuredClone(next.index[target]);

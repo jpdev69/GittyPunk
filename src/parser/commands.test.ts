@@ -824,6 +824,31 @@ describe("git bundle, git clone, and git filter-repo", () => {
     ]);
     expect(result.repo.remoteTracking).toEqual({});
   });
+
+  it("restores files deleted with git rm via unstage or source/checkout options", () => {
+    let repo = createInitialRepository();
+    repo = runOk(repo, "git rm lowerdeck/sofa").repo;
+    expect(repo.working["lowerdeck/sofa"]).toBeUndefined();
+    expect(repo.index["lowerdeck/sofa"]).toBeUndefined();
+
+    // Plain restore gives hint about staged deletion
+    const failedRestore = run(repo, "git restore lowerdeck/sofa");
+    expect(failedRestore.error).toBe(true);
+    expect(failedRestore.output.join("\n")).toContain("staged for deletion");
+
+    // Unstage deletion, then restore working tree
+    let restored = runOk(repo, "git restore --staged lowerdeck/sofa").repo;
+    expect(restored.index["lowerdeck/sofa"]).toBeDefined();
+    restored = runOk(restored, "git restore lowerdeck/sofa").repo;
+    expect(restored.working["lowerdeck/sofa"]).toBeDefined();
+
+    // Single command restore --source HEAD or checkout --
+    const oneStep = runOk(repo, "git restore -s HEAD lowerdeck/sofa").repo;
+    expect(oneStep.working["lowerdeck/sofa"]).toBeDefined();
+
+    const checkedOut = runOk(repo, "git checkout -- lowerdeck/sofa").repo;
+    expect(checkedOut.working["lowerdeck/sofa"]).toBeDefined();
+  });
 });
 
 describe("git reset and error handling", () => {
