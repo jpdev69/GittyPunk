@@ -29,25 +29,22 @@ export function removeWorkingArtifact(repo: Repository, path: string): Repositor
 
 export function restoreWorking(repo: Repository, path: string): Repository {
   const next = cloneRepo(repo);
-  const indexPaths = pathsUnderPrefix(next.index, path);
-  if (indexPaths.length > 0) {
-    for (const target of indexPaths) {
-      next.working[target] = structuredClone(next.index[target]);
+  const paths = pathsUnderPrefix(next.index, path);
+  if (paths.length === 0) {
+    const headTree = headCommit(next).tree;
+    if (headTree[path] || pathsUnderPrefix(headTree, path).length > 0) {
+      throw new GitError(
+        `error: pathspec '${path}' did not match any file known to git\nhint: '${path}' is staged for deletion. Use 'git restore --staged ${path}' or 'git restore -s HEAD ${path}'.`,
+      );
     }
-    return next;
+    throw new GitError(
+      `error: pathspec '${path}' did not match any file known to git`,
+    );
   }
-  const headTree = headCommit(next).tree;
-  const headPaths = pathsUnderPrefix(headTree, path);
-  if (headPaths.length > 0) {
-    for (const target of headPaths) {
-      next.index[target] = structuredClone(headTree[target]);
-      next.working[target] = structuredClone(headTree[target]);
-    }
-    return next;
+  for (const target of paths) {
+    next.working[target] = structuredClone(next.index[target]);
   }
-  throw new GitError(
-    `error: pathspec '${path}' did not match any file known to git`,
-  );
+  return next;
 }
 
 function clearResolvedConflicts(repo: Repository, paths: string[]): void {
