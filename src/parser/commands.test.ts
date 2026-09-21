@@ -856,6 +856,10 @@ describe("git bundle, git clone, and git filter-repo", () => {
     repo = runOk(repo, 'git commit -m "Removed chair"').repo;
     repo = runOk(repo, "git checkout -b new").repo;
 
+    const failedRestore = run(repo, "git restore lowerdeck/chair");
+    expect(failedRestore.error).toBe(true);
+    expect(failedRestore.output.join("\n")).toContain("was deleted in past history");
+
     const failedAdd = run(repo, "git add lowerdeck/chair");
     expect(failedAdd.error).toBe(true);
     expect(failedAdd.output.join("\n")).toContain("did not match any files");

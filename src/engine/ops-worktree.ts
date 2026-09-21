@@ -37,6 +37,16 @@ export function restoreWorking(repo: Repository, path: string): Repository {
         `error: pathspec '${path}' did not match any file known to git\nhint: '${path}' is staged for deletion. Use 'git restore --staged ${path}' or 'git restore -s HEAD ${path}'.`,
       );
     }
+    for (const commitObj of Object.values(next.commits)) {
+      if (
+        commitObj.tree[path] ||
+        pathsUnderPrefix(commitObj.tree, path).length > 0
+      ) {
+        throw new GitError(
+          `error: pathspec '${path}' did not match any file known to git\nhint: '${path}' was deleted in past history. Use 'git restore -s ${commitObj.id.slice(0, 7)} ${path}' or 'git restore -s HEAD~1 ${path}'.`,
+        );
+      }
+    }
     throw new GitError(
       `error: pathspec '${path}' did not match any file known to git`,
     );
