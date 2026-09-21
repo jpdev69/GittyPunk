@@ -1,6 +1,3 @@
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
   applyOriginUpdate,
@@ -96,10 +93,42 @@ function fillPlaceholders(line: string, sha: string): string {
   return filled;
 }
 
-function inventoryPath(): string {
-  const here = dirname(fileURLToPath(import.meta.url));
-  return join(here, "..", "..", "predates", "original-git-available-commands.txt");
-}
+const ORIGINAL_INVENTORY_LINES: string[] = [
+  "git status --short",
+  "git add <specific files>",
+  "git diff --cached",
+  "git add -p",
+  "git commit --amend",
+  "git commit --amend --no-edit",
+  'git commit -m "<message>"',
+  "git config pull.rebase true",
+  "git pull",
+  "git log origin/main..main --oneline",
+  "git log --all --oneline -- <path>",
+  "git branch -a --contains <sha>",
+  "git remote -v",
+  "git show <sha> --stat",
+  "git status --ignored",
+  "git rm --cached <file>",
+  "git reset --hard HEAD~1",
+  "git reset --soft HEAD~1",
+  "git rebase --onto <other-tip> <merge-base> <branch>",
+  "git rebase -i origin/main",
+  "git rebase --abort",
+  "git filter-repo --force --invert-paths --path <path>",
+  "git bundle create ../<repo>-backup.bundle --all",
+  "git remote add origin <url>",
+  "git fetch origin",
+  "git push --force-with-lease origin <branch>",
+  "git push --force-with-lease",
+  "git ls-files",
+  "git ls-tree <commit> --name-only",
+  "git diff <old-tip> <new-tip>",
+  "git fetch",
+  "git reset --hard origin/main",
+  "git clone <bundle>",
+  "git add <file>",
+];
 
 const DIRTY_COMMANDS = new Set([
   "status",
@@ -112,10 +141,7 @@ const DIRTY_COMMANDS = new Set([
 ]);
 
 function inventoryLines(sha: string): string[] {
-  return readFileSync(inventoryPath(), "utf-8")
-    .split(/\r?\n/)
-    .map((line) => fillPlaceholders(line, sha))
-    .filter((line) => line.trim().length > 0);
+  return ORIGINAL_INVENTORY_LINES.map((line) => fillPlaceholders(line, sha));
 }
 
 describe("original command inventory", () => {
