@@ -56,7 +56,9 @@ export function commit(repo: Repository, options: CommitOptions = {}): CommitRes
     message = options.message ?? head.message;
   } else {
     if (options.message === undefined) {
-      throw new GitError('fatal: no commit message given (use -m "<message>")');
+      throw new GitError(
+        'fatal: no commit message given (use -m "<message>")\nusage: git commit -m "<message>"\n\nExamples:\n  git commit -m "Recolor sofa"\n  git commit --amend --no-edit',
+      );
     }
     message = options.message;
   }

@@ -145,7 +145,7 @@ export const remoteCommand: CommandHandler = ({ repo, args }) => {
   if (subcommand === "add") {
     if (!name || !url) {
       throw new GitError(
-        `error: remote add requires a name and a url\n${REMOTE_USAGE}`,
+        `error: remote add requires a name and a url\n${REMOTE_USAGE}\n\nExamples:\n  git remote add origin https://gittypunk.local/house.git`,
       );
     }
     return { repo: addRemote(repo, name, url), output: [] };
@@ -187,13 +187,13 @@ export const bundleCommand: CommandHandler = ({ repo, env, args }) => {
   const subcommand = parsed.positionals[0];
   if (subcommand !== "create") {
     throw new GitError(
-      `error: git bundle: '${subcommand ?? ""}' is not a valid subcommand\n${BUNDLE_USAGE}`,
+      `error: git bundle: '${subcommand ?? ""}' is not a valid subcommand\n${BUNDLE_USAGE}\n\nExamples:\n  git bundle create house.bundle --all`,
     );
   }
   const file = parsed.positionals[1];
   if (!file) {
     throw new GitError(
-      `error: bundle create requires a file name\n${BUNDLE_USAGE}`,
+      `error: bundle create requires a file name\n${BUNDLE_USAGE}\n\nExamples:\n  git bundle create house.bundle --all`,
     );
   }
   const bundle = bundleCreate(repo);
@@ -219,7 +219,7 @@ export const cloneCommand: CommandHandler = ({ env, args }) => {
   const name = parsed.positionals[0];
   if (!name) {
     throw new GitError(
-      `error: git clone requires a bundle name\n${CLONE_USAGE}`,
+      `error: git clone requires a bundle name\n${CLONE_USAGE}\n\nExamples:\n  git clone house.bundle`,
     );
   }
   const bundle = env.bundles[name] ?? env.bundles[basename(name)];
@@ -233,7 +233,7 @@ export const cloneCommand: CommandHandler = ({ env, args }) => {
 };
 
 const FILTER_REPO_USAGE =
-  "usage: git filter-repo --force --invert-paths --path <path>";
+  "usage: git filter-repo --force --invert-paths --path <path>\n\nExamples:\n  git filter-repo --force --invert-paths --path lowerdeck/tv";
 
 export const filterRepoCommand: CommandHandler = ({ repo, args }) => {
   const parsed = parseArgs(args, new Set(["path", "paths"]));

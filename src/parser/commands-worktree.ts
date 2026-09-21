@@ -27,7 +27,8 @@ export const initCommand: CommandHandler = (): HandlerResult => ({
   output: ["Reinitialized existing GittyPunk repository in the house"],
 });
 
-const STATUS_USAGE = "usage: git status [<options>] [--] [<pathspec>...]";
+const STATUS_USAGE =
+  "usage: git status [<options>]\n\nExamples:\n  git status\n  git status --short";
 
 export const statusCommand: CommandHandler = ({ repo, args }) => {
   const parsed = parseArgs(args);
@@ -48,7 +49,8 @@ export const statusCommand: CommandHandler = ({ repo, args }) => {
   };
 };
 
-const ADD_USAGE = "usage: git add [<options>] [--] [<pathspec>...]";
+const ADD_USAGE =
+  "usage: git add [<options>] [--] [<pathspec>...]\n\nExamples:\n  git add lowerdeck/sofa\n  git add .";
 
 export const addCommand: CommandHandler = ({ repo, args }) => {
   const parsed = parseArgs(args);
@@ -101,7 +103,7 @@ export const addCommand: CommandHandler = ({ repo, args }) => {
   }
   if (parsed.positionals.length === 0) {
     throw new GitError(
-      "Nothing specified, nothing added.\nhint: Maybe you wanted to say 'git add .'?",
+      `Nothing specified, nothing added.\n${ADD_USAGE}\n\nExamples:\n  git add lowerdeck/sofa\n  git add .`,
     );
   }
   let next = repo;
@@ -117,7 +119,8 @@ function countLabel(count: number, singular: string): string {
   return `${count} ${count === 1 ? singular : `${singular}s`}`;
 }
 
-const RM_USAGE = "usage: git rm [<options>] [--] <pathspec>...";
+const RM_USAGE =
+  "usage: git rm [<options>] [--] <pathspec>...\n\nExamples:\n  git rm lowerdeck/sofa\n  git rm --cached lowerdeck/sofa";
 
 export const rmCommand: CommandHandler = ({ repo, args }) => {
   const parsed = parseArgs(args, new Set(["object", "file"]));
@@ -150,7 +153,7 @@ export const rmCommand: CommandHandler = ({ repo, args }) => {
   }
   if (specs.length === 0) {
     throw new GitError(
-      "fatal: No pathspec was given. Which files should I remove?",
+      `fatal: No pathspec was given. Which files should I remove?\n${RM_USAGE}\n\nExamples:\n  git rm lowerdeck/sofa\n  git rm --cached lowerdeck/sofa`,
     );
   }
   const headTree = headCommit(repo).tree;
@@ -176,7 +179,8 @@ export const rmCommand: CommandHandler = ({ repo, args }) => {
   };
 };
 
-const RESTORE_USAGE = "usage: git restore [--staged] <pathspec>...";
+const RESTORE_USAGE =
+  "usage: git restore [--staged] <pathspec>...\n\nExamples:\n  git restore lowerdeck/chair\n  git restore --staged lowerdeck/chair\n  git restore -s HEAD~1 lowerdeck/chair";
 
 export const restoreCommand: CommandHandler = ({ repo, args }) => {
   const parsed = parseArgs(args, new Set(["source", "s"]));
@@ -195,7 +199,9 @@ export const restoreCommand: CommandHandler = ({ repo, args }) => {
         : undefined;
 
   if (parsed.positionals.length === 0) {
-    throw new GitError("fatal: you must specify path(s) to restore");
+    throw new GitError(
+      `fatal: you must specify path(s) to restore\n${RESTORE_USAGE}\n\nExamples:\n  git restore lowerdeck/chair\n  git restore --staged lowerdeck/chair\n  git restore -s HEAD~1 lowerdeck/chair`,
+    );
   }
 
   let next = repo;
@@ -230,7 +236,7 @@ export const restoreCommand: CommandHandler = ({ repo, args }) => {
 };
 
 const DIFF_USAGE =
-  "usage: git diff [<options>] [<commit>] [<commit>] [--] [<path>...]";
+  "usage: git diff [<options>] [<commit>] [<commit>]\n\nExamples:\n  git diff\n  git diff --cached\n  git diff HEAD~1 HEAD";
 
 export const diffCommand: CommandHandler = ({ repo, args }) => {
   const parsed = parseArgs(args);
@@ -274,7 +280,8 @@ export const diffCommand: CommandHandler = ({ repo, args }) => {
   return { output: formatDiff(entries) };
 };
 
-const LS_FILES_USAGE = "usage: git ls-files [<options>] [<pathspec>...]";
+const LS_FILES_USAGE =
+  "usage: git ls-files\n\nExamples:\n  git ls-files";
 
 export const lsFilesCommand: CommandHandler = ({ repo, args }) => {
   const parsed = parseArgs(args);

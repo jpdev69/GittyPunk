@@ -45,7 +45,8 @@ import {
 } from "./format";
 import type { CommandHandler, HandlerResult } from "./types";
 
-const COMMIT_USAGE = "usage: git commit [<options>] [--] [<pathspec>...]";
+const COMMIT_USAGE =
+  "usage: git commit -m \"<message>\"\n\nExamples:\n  git commit -m \"Recolor sofa\"\n  git commit --amend --no-edit";
 
 function stageTrackedChanges(repo: Repository): Repository {
   let next = repo;
@@ -106,7 +107,8 @@ export const commitCommand: CommandHandler = ({ repo, args }) => {
   };
 };
 
-const CONFIG_USAGE = "usage: git config [<options>] <name> [<value>]";
+const CONFIG_USAGE =
+  "usage: git config <name> [<value>]\n\nExamples:\n  git config pull.rebase true";
 
 export const configCommand: CommandHandler = ({ repo, args }) => {
   const parsed = parseArgs(args);
@@ -130,7 +132,8 @@ export const configCommand: CommandHandler = ({ repo, args }) => {
   return { repo: setConfig(repo, key, value), output: [] };
 };
 
-const RESET_USAGE = "usage: git reset [--soft | --mixed | --hard] [<commit>]";
+const RESET_USAGE =
+  "usage: git reset [--hard|--soft|--mixed] [<commit>]\n\nExamples:\n  git reset --hard HEAD~1\n  git reset --soft HEAD~1";
 
 export const resetCommand: CommandHandler = ({ repo, args }) => {
   const parsed = parseArgs(args);
@@ -228,7 +231,9 @@ export const branchCommand: CommandHandler = ({ repo, args }) => {
   if (parsed.flags.d === true || parsed.flags.D === true) {
     const name = parsed.positionals[0];
     if (!name) {
-      throw new GitError(`error: branch name required\n${BRANCH_USAGE}`);
+      throw new GitError(
+        `error: branch name required\n${BRANCH_USAGE}\n\nExamples:\n  git branch -d feature\n  git branch -D feature`,
+      );
     }
     const tip = repo.branches[name];
     if (!tip) {
@@ -378,7 +383,9 @@ export const checkoutCommand: CommandHandler = ({ repo, args }) => {
 
   const target = parsed.positionals[0];
   if (!target) {
-    throw new GitError(`error: a branch or commit is required\n${CHECKOUT_USAGE}`);
+    throw new GitError(
+      `error: a branch, commit, or path is required\n${CHECKOUT_USAGE}\n\nExamples:\n  git checkout -b feature\n  git checkout main\n  git checkout -- lowerdeck/sofa`,
+    );
   }
   if (!repo.branches[target] && !repo.commits[target]) {
     let matchedPaths: string[] = [];
@@ -446,7 +453,9 @@ export const switchCommand: CommandHandler = ({ repo, args }) => {
   }
   const target = parsed.positionals[0];
   if (!target) {
-    throw new GitError(`error: a branch is required\n${SWITCH_USAGE}`);
+    throw new GitError(
+      `error: a branch is required\n${SWITCH_USAGE}\n\nExamples:\n  git switch -c feature\n  git switch main`,
+    );
   }
   if (!repo.branches[target]) {
     throw new GitError(`fatal: a branch is expected, got the commit '${target}'`);
@@ -485,7 +494,9 @@ export const mergeCommand: CommandHandler = ({ repo, args }) => {
   }
   const target = parsed.positionals[0];
   if (!target) {
-    throw new GitError(`error: a merge target is required\n${MERGE_USAGE}`);
+    throw new GitError(
+      `error: a merge target is required\n${MERGE_USAGE}\n\nExamples:\n  git merge feature\n  git merge --abort`,
+    );
   }
   const outcome = merge(repo, target);
   return { repo: outcome.repo, output: formatMergeOutcome(outcome) };
@@ -525,7 +536,9 @@ export const rebaseCommand: CommandHandler = ({ repo, args }) => {
   const upstream = parsed.positionals[0];
   const branch = parsed.positionals[1];
   if (onto === undefined && upstream === undefined) {
-    throw new GitError(`error: a rebase base is required\n${REBASE_USAGE}`);
+    throw new GitError(
+      `error: a rebase base is required\n${REBASE_USAGE}\n\nExamples:\n  git rebase main\n  git rebase -i origin/main\n  git rebase --abort`,
+    );
   }
   const outcome = rebase(repo, {
     onto: onto ?? upstream ?? "",
@@ -535,7 +548,8 @@ export const rebaseCommand: CommandHandler = ({ repo, args }) => {
   return { repo: outcome.repo, output: formatRebaseOutcome(outcome) };
 };
 
-const LOG_USAGE = "usage: git log [<options>] [<revision-range>] [--] [<path>]";
+const LOG_USAGE =
+  "usage: git log [<options>] [<revision-range>]\n\nExamples:\n  git log --oneline\n  git log --all --graph\n  git log origin/main..main";
 
 export const logCommand: CommandHandler = ({ repo, args }) => {
   const parsed = parseArgs(args, new Set(["n", "max-count"]));
@@ -594,7 +608,8 @@ export const logCommand: CommandHandler = ({ repo, args }) => {
   return { output };
 };
 
-const SHOW_USAGE = "usage: git show [<commit>] [--stat]";
+const SHOW_USAGE =
+  "usage: git show [<commit>]\n\nExamples:\n  git show HEAD\n  git show HEAD --stat";
 
 export const showCommand: CommandHandler = ({ repo, args }) => {
   const parsed = parseArgs(args);
@@ -626,7 +641,9 @@ export const lsTreeCommand: CommandHandler = ({ repo, args }) => {
   );
   const revision = parsed.positionals[0];
   if (!revision) {
-    throw new GitError(`fatal: no tree-ish given\n${LS_TREE_USAGE}`);
+    throw new GitError(
+      `fatal: no tree-ish given\n${LS_TREE_USAGE}\n\nExamples:\n  git ls-tree HEAD\n  git ls-tree HEAD --name-only`,
+    );
   }
   const entries = lsTree(repo, revision, parsed.positionals[1]);
   const nameOnly =
