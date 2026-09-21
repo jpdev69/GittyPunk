@@ -55,6 +55,25 @@ describe("remote sync (Phase 6)", () => {
     );
   });
 
+  it("keeps remote house intact when committing locally before push", () => {
+    let repo = createInitialRepository();
+    repo = runOk(repo, "git push");
+
+    repo = runOk(repo, "git rm lowerdeck/sofa");
+    repo = runOk(repo, 'git commit -m "Removed sofa"');
+
+    expect(repo.working["lowerdeck/sofa"]).toBeUndefined();
+
+    const originTip = repo.origin.branches["main"]!;
+    const originCommit = repo.origin.commits[originTip]!;
+    expect(originCommit.tree["lowerdeck/sofa"]).toBeDefined();
+
+    repo = runOk(repo, "git push");
+    const updatedTip = repo.origin.branches["main"]!;
+    const updatedCommit = repo.origin.commits[updatedTip]!;
+    expect(updatedCommit.tree["lowerdeck/sofa"]).toBeUndefined();
+  });
+
   it("rejects non-fast-forward push with git-accurate error text", () => {
     let repo = createInitialRepository();
     repo = runOk(repo, "git push");

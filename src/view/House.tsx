@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { currentBranch, headCommit } from "../engine";
+import { buildInitialHouse, currentBranch, headCommit } from "../engine";
 import { useAppStore } from "../state/store";
 import type { ViewMode } from "../state/store";
 import { computeVisualStates } from "./artifact-states";
@@ -167,7 +167,10 @@ export default function House() {
       repo.origin.branches[currentBranch(repo) ?? "main"] ??
       Object.values(repo.origin.branches)[0];
     const originCommit = originTip ? repo.origin.commits[originTip] : undefined;
-    const remoteTree = originCommit ? originCommit.tree : repo.working;
+    const initialCommitTree =
+      Object.values(repo.commits).find((c) => c.parents.length === 0)?.tree ??
+      buildInitialHouse();
+    const remoteTree = originCommit ? originCommit.tree : initialCommitTree;
 
     const tree = travel
       ? travel.tree

@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { currentBranch } from "../engine";
+import { buildInitialHouse, currentBranch } from "../engine";
 import { useAppStore } from "../state/store";
 import { COMPARE_SIDE_OFFSET } from "./compare";
 import { ArtifactGeometry } from "./geometry";
@@ -16,7 +16,10 @@ export default function RemoteSideBySideView() {
     const originTip =
       repo.origin.branches[branch] ?? Object.values(repo.origin.branches)[0];
     const originCommit = originTip ? repo.origin.commits[originTip] : undefined;
-    const remoteTree = originCommit ? originCommit.tree : repo.working;
+    const initialCommitTree =
+      Object.values(repo.commits).find((c) => c.parents.length === 0)?.tree ??
+      buildInitialHouse();
+    const remoteTree = originCommit ? originCommit.tree : initialCommitTree;
 
     return {
       localItems: buildRenderList(repo.working),
