@@ -26,30 +26,31 @@ export interface Mission {
   isCompleted: (repo: Repository, env: ExecutionEnv) => boolean;
 }
 
-export const MISSIONS: Mission[] = [
-  {
-    id: "tutorial",
-    title: "Tutorial — Your First Push",
-    description:
-      "Learn the core Git workflow: check status, stage your changes, commit a snapshot, and push to origin.",
-    instructions: [
-      "Type 'git status' to inspect modified house artifacts.",
-      "Type 'git add lowerdeck/sofa' to stage the sofa into the blueprint.",
-      "Type 'git commit -m \"Recolor sofa\"' to freeze a snapshot.",
-      "Type 'git push' to sync your snapshot with origin.",
-    ],
-    setup: (_repo, env) => {
-      let next = createInitialRepository();
-      next = runPush(next);
-      next = recolorArtifact(next, "lowerdeck/sofa", "#ff0088");
-      return { repo: next, env };
-    },
-    isCompleted: (repo) => {
-      const head = headCommit(repo);
-      const pushed = repo.origin.branches["main"] === head.id;
-      return head.message !== "Initial house" && pushed && getStatus(repo).clean;
-    },
+export const TUTORIAL_MISSION: Mission = {
+  id: "tutorial",
+  title: "Tutorial — Your First Push",
+  description:
+    "Learn the core Git workflow: check status, stage your changes, commit a snapshot, and push to origin.",
+  instructions: [
+    "Type 'git status' to inspect modified house artifacts.",
+    "Type 'git add lowerdeck/sofa' to stage the sofa into the blueprint.",
+    "Type 'git commit -m \"Recolor sofa\"' to freeze a snapshot.",
+    "Type 'git push' to sync your snapshot with origin.",
+  ],
+  setup: (_repo, env) => {
+    let next = createInitialRepository();
+    next = runPush(next);
+    next = recolorArtifact(next, "lowerdeck/sofa", "#ff0088");
+    return { repo: next, env };
   },
+  isCompleted: (repo) => {
+    const head = headCommit(repo);
+    const pushed = repo.origin.branches["main"] === head.id;
+    return head.message !== "Initial house" && pushed && getStatus(repo).clean;
+  },
+};
+
+export const MISSIONS: Mission[] = [
   {
     id: "clean_tree",
     title: "Mission 1 — Clean the Tree",

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MISSIONS } from "../game/missions";
+import { MISSIONS, TUTORIAL_MISSION } from "../game/missions";
 import { useAppStore } from "../state/store";
 
 export default function MissionPanel() {
@@ -9,9 +9,8 @@ export default function MissionPanel() {
   const [open, setOpen] = useState(false);
   const [cardMinimized, setCardMinimized] = useState(false);
 
-  const tutorialMission = MISSIONS.find((m) => m.id === "tutorial")!;
   const activeMission = MISSIONS.find((m) => m.id === activeMissionId);
-  const displayCard = activeMission ?? tutorialMission;
+  const displayCard = activeMission ?? TUTORIAL_MISSION;
 
   return (
     <div className="mission-panel-wrap">

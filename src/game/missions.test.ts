@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createInitialRepository } from "../engine";
 import { emptyEnv, executeCommand } from "../parser";
 import type { ExecutionEnv } from "../parser";
-import { MISSIONS } from "./missions";
+import { MISSIONS, TUTORIAL_MISSION } from "./missions";
 
 function run(
   input: string,
@@ -14,7 +14,7 @@ function run(
 
 describe("game missions & validators (Phase 7)", () => {
   it("completes tutorial — your first push", () => {
-    const mission = MISSIONS.find((m) => m.id === "tutorial")!;
+    const mission = TUTORIAL_MISSION;
     const { env } = mission.setup(createInitialRepository(), emptyEnv());
     let repo = mission.setup(createInitialRepository(), emptyEnv()).repo;
     expect(mission.isCompleted(repo, env)).toBe(false);
