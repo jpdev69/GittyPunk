@@ -14,14 +14,14 @@ export interface PieceSurface {
 }
 
 export const DEFAULT_EDGES = "#151a26";
-export const SELECTED_EDGES = "#7fe3ff";
+export const SELECTED_EDGES = "#ffd76a";
 
 const STAGED_TINT = "#5aa9ff";
 const STAGED_GLOW = "#2f9dff";
 const MODIFIED_GLOW = "#ffd76a";
 const UNTRACKED_GLOW = "#b476ff";
 const CONFLICT_GLOW = "#ff5050";
-const SELECTED_GLOW = "#58e6ff";
+const SELECTED_GLOW = "#ffd76a";
 const BLUEPRINT_TINT = "#5aa9ff";
 const BLUEPRINT_EDGES = "#8fc4ff";
 const SNAPSHOT_TINT = "#dfe7f3";
@@ -95,33 +95,39 @@ export function resolveSurface(
   if (mode === "blueprint") {
     const isStaged = Boolean(state && state.staged && state.staged !== "removed");
     surface = {
-      color: lerpColor(item.color, BLUEPRINT_TINT, 0.55),
-      emissive: isStaged ? STAGED_GLOW : "#000000",
-      intensity: isStaged ? 0.28 : 0,
+      color: selected
+        ? lerpColor(item.color, "#ffffff", 0.3)
+        : lerpColor(item.color, BLUEPRINT_TINT, 0.55),
+      emissive: selected ? SELECTED_GLOW : isStaged ? STAGED_GLOW : "#000000",
+      intensity: selected ? 0.5 : isStaged ? 0.28 : 0,
       shimmer: isStaged ? "blueprint" : null,
       opacity: 1,
-      edges: selected ? SELECTED_EDGES : BLUEPRINT_EDGES,
+      edges: selected ? "#0d1424" : BLUEPRINT_EDGES,
       ghost,
     };
   } else if (mode === "snapshot") {
     surface = {
-      color: lerpColor(item.color, SNAPSHOT_TINT, 0.4),
-      emissive: "#000000",
-      intensity: 0,
+      color: selected
+        ? lerpColor(item.color, "#ffffff", 0.35)
+        : lerpColor(item.color, SNAPSHOT_TINT, 0.4),
+      emissive: selected ? SELECTED_GLOW : "#000000",
+      intensity: selected ? 0.5 : 0,
       shimmer: null,
       opacity: 1,
-      edges: selected ? SELECTED_EDGES : SNAPSHOT_EDGES,
+      edges: selected ? "#0d1424" : SNAPSHOT_EDGES,
       ghost,
     };
   } else if (mode === "remote") {
     const isConflict = Boolean(state?.conflict);
     surface = {
-      color: lerpColor(item.color, REMOTE_TINT, 0.45),
-      emissive: isConflict ? CONFLICT_GLOW : "#000000",
-      intensity: isConflict ? 0.3 : 0,
+      color: selected
+        ? lerpColor(item.color, "#ffffff", 0.3)
+        : lerpColor(item.color, REMOTE_TINT, 0.45),
+      emissive: selected ? SELECTED_GLOW : isConflict ? CONFLICT_GLOW : "#000000",
+      intensity: selected ? 0.5 : isConflict ? 0.3 : 0,
       shimmer: isConflict ? "conflict" : null,
       opacity: 1,
-      edges: selected ? SELECTED_EDGES : REMOTE_EDGES,
+      edges: selected ? "#0d1424" : REMOTE_EDGES,
       ghost,
     };
   } else {
