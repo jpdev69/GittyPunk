@@ -578,6 +578,40 @@ body {
   flex-direction: column;
   border-top: 1px solid #26324a;
   background-color: #0a0f18;
+  transition: height 0.2s ease;
+}
+
+.terminal-minimized {
+  height: auto;
+}
+
+.terminal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 14px;
+  background-color: #0d1424;
+  border-bottom: 1px solid #1d2a44;
+  font-size: 11px;
+  letter-spacing: 0.8px;
+  color: #8b98b8;
+  cursor: pointer;
+  user-select: none;
+}
+
+.terminal-toggle-btn {
+  background: transparent;
+  border: none;
+  color: #7ee787;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.terminal-toggle-btn:hover {
+  background: #1d2a44;
 }
 
 .terminal-lines {

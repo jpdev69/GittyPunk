@@ -39,6 +39,29 @@ function SceneControls() {
   const controlsRef = useRef<CameraControlsImpl | null>(null);
   const lastInteractionRef = useRef(0);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const controls = controlsRef.current;
+      if (!controls) return;
+      if (e.ctrlKey) {
+        controls.mouseButtons.left = 2; // ACTION.TRUCK
+      }
+    };
+    const handleKeyUp = (e: KeyboardEvent) => {
+      const controls = controlsRef.current;
+      if (!controls) return;
+      if (!e.ctrlKey) {
+        controls.mouseButtons.left = 1; // ACTION.ROTATE
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
+  }, []);
+
   useFrame((_, delta) => {
     if (performance.now() - lastInteractionRef.current < 2500) return;
     controlsRef.current?.rotate(delta * 0.02, 0, false);
@@ -64,6 +87,13 @@ function SceneControls() {
     <CameraControls
       makeDefault
       ref={controlsRef}
+      dollyToCursor={false}
+      mouseButtons={{
+        left: 1, // ACTION.ROTATE
+        middle: 2, // ACTION.TRUCK
+        right: 2, // ACTION.TRUCK
+        wheel: 8, // ACTION.DOLLY
+      }}
       onControlStart={markInteraction}
       onControlEnd={markInteraction}
       onTransitionStart={markInteraction}

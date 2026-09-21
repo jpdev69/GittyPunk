@@ -7,6 +7,7 @@ export default function Terminal() {
   const [value, setValue] = useState("");
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState<number | null>(null);
+  const [minimized, setMinimized] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -17,16 +18,38 @@ export default function Terminal() {
 
   return (
     <section
-      className="terminal"
+      className={`terminal ${minimized ? "terminal-minimized" : ""}`}
       onClick={() => inputRef.current?.focus()}
     >
-      <div className="terminal-lines" ref={scrollRef}>
-        {lines.map((line, index) => (
-          <p key={index} className={`terminal-line terminal-${line.kind}`}>
-            {line.kind === "input" ? `$ ${line.text}` : line.text || "\u00a0"}
-          </p>
-        ))}
-      </div>
+      <header
+        className="terminal-header"
+        onClick={(event) => {
+          event.stopPropagation();
+          setMinimized((prev) => !prev);
+        }}
+      >
+        <span className="terminal-title">TERMINAL</span>
+        <button
+          type="button"
+          className="terminal-toggle-btn"
+          onClick={(event) => {
+            event.stopPropagation();
+            setMinimized((prev) => !prev);
+          }}
+          aria-label={minimized ? "Expand terminal" : "Minimize terminal"}
+        >
+          {minimized ? "▲ Expand" : "▼ Minimize"}
+        </button>
+      </header>
+      {!minimized && (
+        <div className="terminal-lines" ref={scrollRef}>
+          {lines.map((line, index) => (
+            <p key={index} className={`terminal-line terminal-${line.kind}`}>
+              {line.kind === "input" ? `$ ${line.text}` : line.text || "\u00a0"}
+            </p>
+          ))}
+        </div>
+      )}
       <form
         className="terminal-form"
         onSubmit={(event) => {
