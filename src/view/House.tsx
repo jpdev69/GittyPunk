@@ -163,9 +163,11 @@ export default function House() {
         }
       }
     }
+    const selectedRemote = useAppStore.getState().selectedRemoteBranch;
+    const originBranch =
+      selectedRemote ?? currentBranch(repo) ?? "main";
     const originTip =
-      repo.origin.branches[currentBranch(repo) ?? "main"] ??
-      Object.values(repo.origin.branches)[0];
+      repo.origin.branches[originBranch] ?? Object.values(repo.origin.branches)[0];
     const originCommit = originTip ? repo.origin.commits[originTip] : undefined;
     const initialCommitTree =
       Object.values(repo.commits).find((c) => c.parents.length === 0)?.tree ??

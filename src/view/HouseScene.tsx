@@ -1,7 +1,7 @@
 import { CameraControls } from "@react-three/drei";
 import type { CameraControlsImpl } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { currentBranch, headCommit } from "../engine";
 import ComparePanel from "../ui/ComparePanel";
@@ -228,12 +228,67 @@ function TravelBanner() {
 
 function RemoteBanner() {
   const viewMode = useAppStore((state) => state.viewMode);
+  const repo = useAppStore((state) => state.repo);
+  const selectedRemoteBranch = useAppStore(
+    (state) => state.selectedRemoteBranch,
+  );
+  const selectRemoteBranch = useAppStore((state) => state.selectRemoteBranch);
+  const [open, setOpen] = useState(false);
+
   if (viewMode !== "remote") return null;
+
+  const localBranch = currentBranch(repo) ?? "main";
+  const originBranches = Object.keys(repo.origin.branches);
+  if (originBranches.length === 0) originBranches.push("main");
+
+  const activeOriginBranch =
+    selectedRemoteBranch ??
+    (repo.origin.branches[localBranch]
+      ? localBranch
+      : originBranches[0] ?? "main");
+
   return (
     <div className="remote-banner">
-      <span className="remote-label-local">Local House</span>
+      <span className="remote-label-local">Local House ({localBranch})</span>
       <span className="remote-label-vs">VS</span>
-      <span className="remote-label-origin">Remote House (origin)</span>
+      <div className="remote-select-wrap">
+        <button
+          type="button"
+          className="remote-menu-btn"
+          onClick={() => setOpen((prev) => !prev)}
+        >
+          Remote House (origin/{activeOriginBranch})
+          <span className="remote-arrow">{open ? " ▲" : " ▼"}</span>
+        </button>
+        {open && (
+          <div className="remote-dropdown">
+            <button
+              type="button"
+              className={`remote-option ${!selectedRemoteBranch ? "active" : ""}`}
+              onClick={() => {
+                selectRemoteBranch(null);
+                setOpen(false);
+              }}
+            >
+              Auto ({localBranch})
+            </button>
+            <div className="remote-divider" />
+            {originBranches.map((branch) => (
+              <button
+                key={branch}
+                type="button"
+                className={`remote-option ${activeOriginBranch === branch ? "active" : ""}`}
+                onClick={() => {
+                  selectRemoteBranch(branch);
+                  setOpen(false);
+                }}
+              >
+                origin/{branch}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

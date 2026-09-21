@@ -129,6 +129,7 @@ export interface AppState {
   flash: Flash | null;
   travelCommit: string | null;
   diffView: DiffView | null;
+  selectedRemoteBranch: string | null;
   activeMissionId: string | null;
   completedMissions: string[];
   runCommand: (input: string) => void;
@@ -137,6 +138,7 @@ export interface AppState {
   setViewMode: (mode: ViewMode) => void;
   setTravelCommit: (id: string | null) => void;
   closeDiff: () => void;
+  selectRemoteBranch: (branch: string | null) => void;
   selectMission: (id: string | null) => void;
 }
 
@@ -155,6 +157,7 @@ export const useAppStore = create<AppState>()((set, get) => ({
   flash: null,
   travelCommit: null,
   diffView: null,
+  selectedRemoteBranch: null,
   activeMissionId: "tutorial",
   completedMissions: [],
   runCommand: (input) => {
@@ -214,6 +217,7 @@ export const useAppStore = create<AppState>()((set, get) => ({
   setViewMode: (mode) => set({ viewMode: mode, travelCommit: null }),
   setTravelCommit: (id) => set({ travelCommit: id }),
   closeDiff: () => set({ diffView: null }),
+  selectRemoteBranch: (branch) => set({ selectedRemoteBranch: branch }),
   selectMission: (id) => {
     if (!id || id === "sandbox") {
       set({

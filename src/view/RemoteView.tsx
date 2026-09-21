@@ -10,11 +10,15 @@ export default function RemoteSideBySideView() {
   const repo = useAppStore((state) => state.repo);
   const selected = useAppStore((state) => state.selected);
   const select = useAppStore((state) => state.select);
+  const selectedRemoteBranch = useAppStore(
+    (state) => state.selectedRemoteBranch,
+  );
 
   const { localItems, remoteItems } = useMemo(() => {
-    const branch = currentBranch(repo) ?? "main";
+    const activeBranch =
+      selectedRemoteBranch ?? currentBranch(repo) ?? "main";
     const originTip =
-      repo.origin.branches[branch] ?? Object.values(repo.origin.branches)[0];
+      repo.origin.branches[activeBranch] ?? Object.values(repo.origin.branches)[0];
     const originCommit = originTip ? repo.origin.commits[originTip] : undefined;
     const initialCommitTree =
       Object.values(repo.commits).find((c) => c.parents.length === 0)?.tree ??
@@ -25,7 +29,7 @@ export default function RemoteSideBySideView() {
       localItems: buildRenderList(repo.working),
       remoteItems: buildRenderList(remoteTree),
     };
-  }, [repo]);
+  }, [repo, selectedRemoteBranch]);
 
   return (
     <group>
