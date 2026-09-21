@@ -243,4 +243,14 @@ describe("app store", () => {
     useAppStore.getState().runCommand("clear");
     expect(useAppStore.getState().lines).toHaveLength(0);
   });
+
+  it("resets house to clean initial state when selecting sandbox mode", () => {
+    useAppStore.getState().selectMission("rewind");
+    expect(useAppStore.getState().activeMissionId).toBe("rewind");
+    expect(useAppStore.getState().repo.working["upperdeck/bed"]).toBeUndefined();
+
+    useAppStore.getState().selectMission("sandbox");
+    expect(useAppStore.getState().activeMissionId).toBeNull();
+    expect(useAppStore.getState().repo.working["upperdeck/bed"]).toBeDefined();
+  });
 });

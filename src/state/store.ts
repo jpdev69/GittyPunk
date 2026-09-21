@@ -216,7 +216,21 @@ export const useAppStore = create<AppState>()((set, get) => ({
   closeDiff: () => set({ diffView: null }),
   selectMission: (id) => {
     if (!id || id === "sandbox") {
-      set({ activeMissionId: null });
+      set({
+        activeMissionId: null,
+        repo: createInitialRepository(),
+        env: emptyEnv(),
+        selected: null,
+        focused: null,
+        travelCommit: null,
+        diffView: null,
+        lines: [
+          {
+            kind: "info",
+            text: "Sandbox Mode (Free Play) - house reset to clean initial state.",
+          },
+        ],
+      });
       return;
     }
     const mission = MISSIONS.find((m) => m.id === id);
