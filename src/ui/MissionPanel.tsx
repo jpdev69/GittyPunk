@@ -7,8 +7,11 @@ export default function MissionPanel() {
   const completedMissions = useAppStore((state) => state.completedMissions);
   const selectMission = useAppStore((state) => state.selectMission);
   const [open, setOpen] = useState(false);
+  const [cardMinimized, setCardMinimized] = useState(false);
 
+  const tutorialMission = MISSIONS.find((m) => m.id === "tutorial")!;
   const activeMission = MISSIONS.find((m) => m.id === activeMissionId);
+  const displayCard = activeMission ?? tutorialMission;
 
   return (
     <div className="mission-panel-wrap">
@@ -20,7 +23,7 @@ export default function MissionPanel() {
         >
           {activeMission
             ? `🎯 ${activeMission.title}`
-            : "🎮 Sandbox Mode"}
+            : "🎮 Sandbox Mode (Free Play)"}
           <span className="mission-arrow">{open ? " ▲" : " ▼"}</span>
         </button>
       </div>
@@ -33,6 +36,7 @@ export default function MissionPanel() {
             onClick={() => {
               selectMission("sandbox");
               setOpen(false);
+              setCardMinimized(false);
             }}
           >
             🎮 Sandbox Mode (Free Play)
@@ -49,6 +53,7 @@ export default function MissionPanel() {
                 onClick={() => {
                   selectMission(mission.id);
                   setOpen(false);
+                  setCardMinimized(false);
                 }}
               >
                 <span className="mission-status">
@@ -61,14 +66,31 @@ export default function MissionPanel() {
         </div>
       )}
 
-      {activeMission && !open && (
+      {!open && (
         <div className="mission-card">
-          <p className="mission-desc">{activeMission.description}</p>
-          <ul className="mission-instructions">
-            {activeMission.instructions.map((text, i) => (
-              <li key={i}>{text}</li>
-            ))}
-          </ul>
+          <div className="mission-card-header">
+            <span className="mission-card-title">
+              {activeMission ? "OBJECTIVES" : "TUTORIAL & TIPS"}
+            </span>
+            <button
+              type="button"
+              className="mission-card-toggle"
+              onClick={() => setCardMinimized((prev) => !prev)}
+              aria-label={cardMinimized ? "Expand banner" : "Minimize banner"}
+            >
+              {cardMinimized ? "▲ Expand" : "▼ Minimize"}
+            </button>
+          </div>
+          {!cardMinimized && (
+            <>
+              <p className="mission-desc">{displayCard.description}</p>
+              <ul className="mission-instructions">
+                {displayCard.instructions.map((text, i) => (
+                  <li key={i}>{text}</li>
+                ))}
+              </ul>
+            </>
+          )}
         </div>
       )}
     </div>

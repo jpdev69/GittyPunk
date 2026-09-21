@@ -748,6 +748,31 @@ body {
   color: #c9d4e8;
 }
 
+.mission-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  letter-spacing: 0.8px;
+  color: #8b98b8;
+  margin-bottom: 4px;
+}
+
+.mission-card-toggle {
+  background: transparent;
+  border: none;
+  color: #7ee787;
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+
+.mission-card-toggle:hover {
+  background: #1d2a44;
+}
+
 .mission-desc {
   margin: 0 0 6px;
   color: #9fd3ff;
