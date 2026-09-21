@@ -5,7 +5,9 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { currentBranch, headCommit } from "../engine";
 import ComparePanel from "../ui/ComparePanel";
+import Confetti from "../ui/Confetti";
 import HistoryPanel from "../ui/HistoryPanel";
+import MissionPanel from "../ui/MissionPanel";
 import { useAppStore } from "../state/store";
 import CompareView from "./compare";
 import House from "./House";
@@ -63,6 +65,16 @@ function SceneControls() {
   }, []);
 
   useFrame((_, delta) => {
+    const flash = useAppStore.getState().flash;
+    const isConflict = flash?.kind === "conflict";
+    const elapsed = flash ? (performance.now() - flash.at) / 1000 : 99;
+    const controls = controlsRef.current;
+
+    if (isConflict && elapsed < 0.4 && controls) {
+      const shake = Math.sin(elapsed * 40) * 0.08;
+      controls.truck(shake, shake, false);
+    }
+
     if (performance.now() - lastInteractionRef.current < 2500) return;
     controlsRef.current?.rotate(delta * 0.02, 0, false);
   });
@@ -328,6 +340,8 @@ export default function HouseScene() {
         <SyncWave />
       </Canvas>
       <SelectionCard />
+      <MissionPanel />
+      <Confetti />
       <HistoryPanel />
       <ComparePanel />
       <TravelBanner />

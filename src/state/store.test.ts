@@ -15,6 +15,8 @@ function resetStore() {
     flash: null,
     travelCommit: null,
     diffView: null,
+    activeMissionId: null,
+    completedMissions: [],
   });
 }
 

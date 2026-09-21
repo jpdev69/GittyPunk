@@ -1,6 +1,14 @@
 import { create } from "zustand";
 import { createInitialRepository, headCommit } from "../engine";
 import type { Repository } from "../engine";
+import {
+  playCommitFreeze,
+  playConflictCrunch,
+  playPushWhoosh,
+  playStageChime,
+  playVictoryFanfare,
+} from "../game/audio";
+import { MISSIONS } from "../game/missions";
 import { emptyEnv, executeCommand } from "../parser";
 import type { CommandResult, ExecutionEnv } from "../parser";
 
@@ -121,12 +129,15 @@ export interface AppState {
   flash: Flash | null;
   travelCommit: string | null;
   diffView: DiffView | null;
+  activeMissionId: string | null;
+  completedMissions: string[];
   runCommand: (input: string) => void;
   select: (path: string | null) => void;
   focusDeck: (path: string | null) => void;
   setViewMode: (mode: ViewMode) => void;
   setTravelCommit: (id: string | null) => void;
   closeDiff: () => void;
+  selectMission: (id: string | null) => void;
 }
 
 export const useAppStore = create<AppState>()((set, get) => ({
@@ -144,8 +155,10 @@ export const useAppStore = create<AppState>()((set, get) => ({
   flash: null,
   travelCommit: null,
   diffView: null,
+  activeMissionId: "tutorial",
+  completedMissions: [],
   runCommand: (input) => {
-    const { repo, env, lines } = get();
+    const { repo, env, lines, activeMissionId, completedMissions } = get();
     const result = executeCommand(input, repo, env);
     if (result.output.length === 1 && result.output[0] === "__CLEAR__") {
       set({ lines: [] });
@@ -158,11 +171,40 @@ export const useAppStore = create<AppState>()((set, get) => ({
         text,
       })),
     ];
+
+    const flash = nextFlash(input, result);
+    if (flash?.kind === "stage") playStageChime();
+    else if (flash?.kind === "commit") {
+      if (input.trim().startsWith("git push")) playPushWhoosh();
+      else playCommitFreeze();
+    } else if (flash?.kind === "conflict") playConflictCrunch();
+
+    const activeMission = MISSIONS.find((m) => m.id === activeMissionId);
+    let newlyCompleted = false;
+    if (activeMission && !completedMissions.includes(activeMission.id)) {
+      if (activeMission.isCompleted(result.repo, result.env)) {
+        newlyCompleted = true;
+        playVictoryFanfare();
+      }
+    }
+    const nextCompleted = newlyCompleted
+      ? [...completedMissions, activeMission!.id]
+      : completedMissions;
+
+    const finalFlash = newlyCompleted
+      ? {
+          kind: "commit" as const,
+          message: `🎉 Mission Passed: ${activeMission!.title}!`,
+          at: performance.now(),
+        }
+      : flash;
+
     set({
       repo: result.repo,
       env: result.env,
       lines: [...lines, ...added].slice(-MAX_TERMINAL_LINES),
-      flash: nextFlash(input, result),
+      flash: finalFlash,
+      completedMissions: nextCompleted,
       travelCommit: result.error ? get().travelCommit : null,
       diffView: result.error ? get().diffView : diffTargetFor(input.trim()),
     });
@@ -172,4 +214,31 @@ export const useAppStore = create<AppState>()((set, get) => ({
   setViewMode: (mode) => set({ viewMode: mode, travelCommit: null }),
   setTravelCommit: (id) => set({ travelCommit: id }),
   closeDiff: () => set({ diffView: null }),
+  selectMission: (id) => {
+    if (!id || id === "sandbox") {
+      set({ activeMissionId: null });
+      return;
+    }
+    const mission = MISSIONS.find((m) => m.id === id);
+    if (!mission) {
+      set({ activeMissionId: null });
+      return;
+    }
+    const { repo, env } = mission.setup(createInitialRepository(), emptyEnv());
+    set({
+      activeMissionId: id,
+      repo,
+      env,
+      selected: null,
+      focused: null,
+      travelCommit: null,
+      diffView: null,
+      lines: [
+        {
+          kind: "info",
+          text: `Mission started: ${mission.title}\n${mission.description}`,
+        },
+      ],
+    });
+  },
 }));
