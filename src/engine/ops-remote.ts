@@ -80,6 +80,7 @@ export interface PushOptions {
   remote?: string;
   branch?: string;
   forceWithLease?: boolean;
+  setUpstream?: boolean;
 }
 
 export interface PushResult {
@@ -105,6 +106,21 @@ export function push(repo: Repository, options: PushOptions = {}): PushResult {
   if (!localId) {
     throw new GitError("fatal: current branch has no commits");
   }
+
+  const hasUpstream =
+    repo.remoteTracking[`origin/${targetBranch}`] !== undefined ||
+    repo.origin.branches[targetBranch] !== undefined;
+
+  const explicitTarget =
+    options.branch !== undefined || options.remote !== undefined;
+  const settingUpstream = options.setUpstream === true;
+
+  if (!hasUpstream && !explicitTarget && !settingUpstream && branch !== MAIN_BRANCH) {
+    throw new GitError(
+      `fatal: The current branch ${branch} has no upstream branch.\nTo push the current branch and set the remote as upstream, use\n\n    git push --set-upstream ${remoteName} ${branch}`,
+    );
+  }
+
   const remoteId = repo.origin.branches[targetBranch];
   const knownId = repo.remoteTracking[`origin/${targetBranch}`];
   if (remoteId === localId) {

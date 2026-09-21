@@ -74,6 +74,30 @@ describe("remote sync (Phase 6)", () => {
     expect(updatedCommit.tree["lowerdeck/sofa"]).toBeUndefined();
   });
 
+  it("requires --set-upstream when pushing a newly created branch for the first time", () => {
+    let repo = createInitialRepository();
+    repo = runOk(repo, "git checkout -b feature");
+    repo = stageAndCommit(
+      recolorArtifact(repo, "lowerdeck/sofa", "#ff00bb"),
+      "lowerdeck/sofa",
+      "Feature sofa",
+    ).repo;
+
+    const failedPush = run(repo, "git push");
+    expect(failedPush.error).toBe(true);
+    expect(failedPush.output.join("\n")).toContain("has no upstream branch");
+    expect(failedPush.output.join("\n")).toContain("git push --set-upstream origin feature");
+
+    const result = run(repo, "git push -u origin feature");
+    expect(result.error).toBe(false);
+    expect(result.repo.remoteTracking["origin/feature"]).toBe(
+      headCommit(result.repo).id,
+    );
+    expect(result.repo.origin.branches["feature"]).toBe(
+      headCommit(result.repo).id,
+    );
+  });
+
   it("rejects non-fast-forward push with git-accurate error text", () => {
     let repo = createInitialRepository();
     repo = runOk(repo, "git push");

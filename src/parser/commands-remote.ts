@@ -108,15 +108,18 @@ export const pushCommand: CommandHandler = ({ repo, args }) => {
     parsed.flags["force-with-lease"] !== undefined ||
     parsed.flags.f === true ||
     parsed.flags.force === true;
+  const setUpstream =
+    parsed.flags.u === true || parsed.flags["set-upstream"] === true;
   const remote = parsed.positionals[0] ?? "origin";
   const branchOption = parsed.positionals[1];
   const current = currentBranch(repo);
   const target = branchOption ?? current ?? "";
   const previous = repo.origin.branches[target];
   const result = push(repo, {
-    remote,
+    remote: parsed.positionals[0] ? remote : undefined,
     branch: branchOption ?? undefined,
     forceWithLease: lease,
+    setUpstream,
   });
   if (!result.updated) {
     return { repo: result.repo, output: ["Everything up-to-date"] };
